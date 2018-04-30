@@ -1,0 +1,328 @@
+\documentclass[11pt, a4paper]{article}
+%\usepackage{geometry}
+\usepackage[inner=2.5cm,outer=2.5cm,top=2.5cm,bottom=2.5cm, textwidth=5cm]{geometry}
+\pagestyle{empty}
+\usepackage{graphicx}
+\usepackage{fancyhdr, lastpage, bbding, pmboxdraw}
+\usepackage[usenames,dvipsnames]{color}
+\definecolor{darkblue}{rgb}{0,0,.6}
+\definecolor{darkred}{rgb}{.7,0,0}
+\definecolor{darkgreen}{rgb}{0,.6,0}
+\definecolor{red}{rgb}{.98,0,0}
+\usepackage[colorlinks,pagebackref,pdfusetitle,urlcolor=darkblue,citecolor=darkblue,linkcolor=darkred,bookmarksnumbered,plainpages=false]{hyperref}
+\renewcommand{\thefootnote}{\fnsymbol{footnote}}
+
+
+
+\pagestyle{fancyplain}
+\fancyhf{}
+\lhead{ \fancyplain{}{MAS101} }
+%\chead{ \fancyplain{}{} }
+\rhead{ \fancyplain{}{\today} }
+%\rfoot{\fancyplain{}{page \thepage\ of \pageref{LastPage}}}
+\fancyfoot[RO, LE] {page \thepage\ of \pageref{LastPage} }
+\thispagestyle{plain}
+
+%%%%%%%%%%%% LISTING %%%
+\usepackage{listings}
+\usepackage{caption}
+\DeclareCaptionFont{white}{\color{white}}
+\DeclareCaptionFormat{listing}{\colorbox{gray}{\parbox{\textwidth}{#1#2#3}}}
+\captionsetup[lstlisting]{format=listing,labelfont=white,textfont=white}
+\usepackage{verbatim} % used to display code
+\usepackage{fancyvrb}
+\usepackage{acronym}
+\usepackage{kotex}
+\usepackage{amsthm}
+\VerbatimFootnotes % Required, otherwise verbatim does not work in footnotes!
+
+
+
+\definecolor{OliveGreen}{cmyk}{0.64,0,0.95,0.40}
+\definecolor{CadetBlue}{cmyk}{0.62,0.57,0.23,0}
+\definecolor{lightlightgray}{gray}{0.93}
+
+
+
+\lstset{
+%language=bash,                          % Code langugage
+basicstyle=\ttfamily,                   % Code font, Examples: \footnotesize, \ttfamily
+keywordstyle=\color{OliveGreen},        % Keywords font ('*' = uppercase)
+commentstyle=\color{gray},              % Comments font
+numbers=left,                           % Line nums position
+numberstyle=\tiny,                      % Line-numbers fonts
+stepnumber=1,                           % Step between two line-numbers
+numbersep=5pt,                          % How far are line-numbers from code
+backgroundcolor=\color{lightlightgray}, % Choose background color
+frame=none,                             % A frame around the code
+tabsize=2,                              % Default tab size
+captionpos=t,                           % Caption-position = bottom
+breaklines=true,                        % Automatic line breaking?
+breakatwhitespace=false,                % Automatic breaks only at whitespace?
+showspaces=false,                       % Dont make spaces visible
+showtabs=false,                         % Dont make tabls visible
+columns=flexible,                       % Column format
+morekeywords={__global__, __device__},  % CUDA specific keywords
+}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{document}
+\begin{center}
+{\Large \textsc{MAS101 : Coding the Mathematics - an OOP approach}}
+\end{center}
+\begin{center}
+\today
+\end{center}
+%\date{September 26, 2014}
+
+\begin{center}
+\rule{6in}{0.4pt}
+\begin{minipage}[t]{.75\textwidth}
+\begin{tabular}{llcccll}
+\textbf{Lecturer:} & Seungwoo Schin & & &  & \textbf{Time:} & TBA \\
+\textbf{Email:} &  \href{mailto:principia_12@kaist.ac.kr}{principia\_12@kaist.ac.kr} & & & & \textbf{Place:} & TBA
+\end{tabular}
+\end{minipage}
+\rule{6in}{0.4pt}
+\end{center}
+\vspace{.5cm}
+\setlength{\unitlength}{1in}
+\renewcommand{\arraystretch}{2}
+
+
+\noindent\textbf{Study Objectives} 머신 러닝에 필요한 수학적인 개념을 직접 파이썬으로 구현해보면서 익히는 것을 목표로 합니다. 
+
+
+\vskip.15in
+\noindent\textbf{Target Audience} 
+\begin{itemize}
+\item 선형대수학과 미적분학, 확률 및 통계의 기본적인 개념이 궁금하신 분 
+\item 다양한 코딩 기술을 다지고 싶으신 분 
+\end{itemize}
+
+
+\vskip.15in
+\noindent\textbf{Things to Learn} 
+\begin{itemize}
+\item 벡터, 행렬에 대한 기본적인 개념 및 연산 
+\item 선형대수학을 활용한 문제풀이 
+\item 수학 문제 적용에 대한 예시 찾아보기
+\end{itemize}
+
+\vskip.15in
+\noindent\textbf{Policy} 
+\begin{itemize} 
+\item 본 강의는 수학 이론을 배우고, 배운 이론을 구현해보는 것으로 이루어져 있습니다. 
+\item 실습 코드는 개설될 Github Repository에 커밋하여 공유하게 할 예정입니다. 
+\item 실습을 하는 것이 의무는 아니지만, 가능하면 실습 문제를 해결해볼 것을 권장드립니다. 
+\end{itemize}
+
+
+\vskip.15in
+\noindent\textbf{Prerequisite} : 기본적인 파이썬 문법에 대한 지식이 필요하며, 중학교 수준의 수학 지식을 가지고 있어야 합니다. 또, 가능하면 git을 사용할 줄 알면 좋습니다. 
+
+\newpage
+
+\noindent \textbf{Tentative Course Outline}
+\begin{center} 
+\begin{flushleft}
+\begin{itemize}
+
+\item Week 0(before class) : Environment Settings / Python Reminder
+
+\begin{itemize}
+\item Python 개발 환경 설치 
+\item 클래스 및 객제지향 : 문법, method, 상속 
+\item 문제 풀이 : 피보나치 수 계산하기, 정렬, 소인수분해 
+\item 소스 코드 작성, 저장, 실행 및 버젼관리 기초 : Git (\textit{Optional})
+\end{itemize}
+
+\item Week 1 : Math Basics/Implementation 
+
+\begin{itemize} 
+\item 수학 
+\begin{itemize}
+\item 집합(set)의 정의 및 연산 
+\item 함수(function)의 정의
+\item 유명한 함수들과 그 성질 살펴보기 : sin, cos, tan, log, exp
+\end{itemize} 
+\item 프로그래밍 
+\begin{itemize} 
+\item 객체지향적 사고 : 클래스를 이용한 집합 및 함수 구현
+\item 재귀 : 피보나치 수열 계산으로 본 재귀함수 
+\item 알고리즘의 시간복잡도 표기법 및 계산 
+\end{itemize} 
+\end{itemize}
+
+\item Week 1.5 : Documentation/Version Control
+\begin{itemize} 
+\item \LaTeX 소개 
+\item git 소개
+\end{itemize} 
+
+\item Week 2 : Linear Algebra(1)
+
+\begin{itemize} 
+\item 수학 
+\begin{itemize}
+\item 벡터와 행렬의 정의 및 연산 : 크기, 사칙연산, 행렬식
+\item 직교좌표계 : 두 좌표간의 거리, 직선, 평면의 방정식
+\item 선형독립과 span
+\item 선형변환
+\item 벡터와 함수 : 함수를 element로 가지는 벡터와, 벡터를 argument로 가지는 함수 
+\end{itemize} 
+\item 프로그래밍 
+\begin{itemize} 
+\item Overloading : 행렬/벡터의 연산 구현 
+\item A bit of Functional Approach : functions as values 
+\end{itemize} 
+\end{itemize}
+
+
+\item Week 2.5 : Support Vector Machine
+\begin{itemize} 
+\item Linearly Seperable Case 
+\item non-linear case : Using Kernel Function
+\item Example on text classification : Linear SVM model for MNIST
+\end{itemize}
+
+
+\item Week 3 : Linear Algebra(2) 
+
+\begin{itemize} 
+\item 수학 
+\begin{itemize}
+\item 행렬의 대각화 
+\item 행렬의 고유값 찾기 
+\item 행렬의 분해 : Singular Value Decomposition(SVD), QR Decomposition 
+\end{itemize} 
+\item 프로그래밍 
+\begin{itemize} 
+\item 2주차의 행렬 클래스를 확장하여 위 내용들 구현하기 
+\item 선형방정식 solver 만들기 
+\end{itemize} 
+\end{itemize}
+
+\item Week 3.5 : Various Applications of Matrix 
+
+\begin{itemize} 
+\item wavelet을 이용한 이미지 손실 압축
+\item Principal Compnent Analysis(PCA) 구현해보기
+\item 선형계획법/게임이론 (\textit{optional}) 
+\end{itemize}
+
+\item Week 4 : Calculus(1) - 미분
+
+\begin{itemize} 
+\item 수학 
+\begin{itemize}
+\item 함수의 극한 
+\item 미분의 정의 및 구현 : Symbolic/Numeric
+\end{itemize} 
+\item 프로그래밍 
+\begin{itemize} 
+\item 수식 parser/계산기 구현 
+\item Symbolic 미분기 구현 
+\item Numeric 미분기 구현 
+\end{itemize} 
+\end{itemize}
+
+\item Week 4.5 : 정규표현식
+\begin{itemize} 
+\item Parsing이란?
+\item 정규표현식이란?
+\item 정규표현식 파서 만들기
+\end{itemize}
+
+
+\item Week 5 : Calculus(2) - 적분
+
+\begin{itemize} 
+\item 수학 
+\begin{itemize}
+\item 적분의 정의 : 리만 합
+\item 미분과의 관계 
+\item 정적분/부정적분 : 다양한 함수의 적분 해보기  
+\end{itemize} 
+\item 프로그래밍 
+\begin{itemize} 
+\item Symbolic 적분기 구현 (부정적분, 정적분 모두에 대해서)
+\item Numeric 적분기 구현 (정적분에 대해서)
+\end{itemize} 
+\end{itemize}
+
+\item Week 5.5 : Fourier Transform 
+\begin{itemize} 
+\item Fourier Transform 이론 
+\item Discrete Fourier Transform 이론 및 Fast Fourier Transform 구현 
+\item FFT를 이용한 악기 소리 샘플 분석 
+\end{itemize}
+
+\item Week 6 : Calculus(3) - 다변수 미분
+
+\begin{itemize} 
+\item 수학 
+\begin{itemize}
+\item 편미분 
+\item 그래디언트와 활용 
+\item 라그랑주 승수법 
+\end{itemize} 
+\item 프로그래밍 
+\begin{itemize} 
+\item 편미분 구현 
+\item 그래디언트 구현 
+\end{itemize} 
+\end{itemize}
+
+\item Week 6.5 : Gradient Descent 
+\begin{itemize} 
+\item Gradient Descent 소개 
+\item 다양한 Gradient Descent 알고리즘 구현 
+\end{itemize}
+
+
+\item Week 7 : Probability and Statistics
+
+\begin{itemize} 
+\item 수학 
+\begin{itemize}
+\item 확률의 정의  
+\item 조건부확률과 베이즈 정리 
+\item 확률변수와 확률분포함수
+\item 정규분포
+\item Central Limit Theorem (\textit{optional})
+\item Bayesian Statistics 
+\end{itemize} 
+\item 프로그래밍 
+\begin{itemize} 
+\item 수치적분을 통한 확률값 계산 
+\end{itemize} 
+\end{itemize}
+
+\item Week 7.5 : Feedforward Neural Net
+\begin{itemize} 
+\item Feedforward Neural Net 이론 소개
+\item Backpropagration / Gradient Descent 
+\item Feedforward Neural Net 구현
+\end{itemize}
+
+
+\item Week 8 : Introduction to Machine Learning - statistical classification 
+
+\begin{itemize} 
+\item 머신 러닝이란? 
+\item 머신 러닝의 분류 : supervised/unsupervised, classification/regression/clustering
+\item Classification 알고리즘들 소개 : Linear Regression, NBC, LDA
+\end{itemize}
+
+
+\end{itemize}
+\end{flushleft}
+\end{center}
+
+
+
+
+
+%%%%%% THE END 
+\end{document} 

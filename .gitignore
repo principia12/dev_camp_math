@@ -1,0 +1,9 @@
+# delete latex aux files
+*.aux 
+*.out
+*.log
+
+# python related files
+__pycache__
+*.pyc
+
