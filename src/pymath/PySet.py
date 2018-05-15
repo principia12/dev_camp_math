@@ -1,8 +1,11 @@
 from global_variables import *
 
 class PySet:
-    def __init__(self, membership):
+    def __init__(self, 
+                    membership, # membership checking 아리랑
+                    eq_func,): # equivalance checking function between elements
         self.membership = membership
+        self.eq_func = eq_func
         
     def __add__(self, other):
         f, g = self.membership, other.membership
@@ -60,13 +63,22 @@ class PyCountableSet(PySet):
     def list_elements(self, limit = 100,):
         i = 0
         g = self.generator()
+        history = []
         while i<limit:
-            print(next(g))
-            i += 1
+            try:
+                a = next(g)
+                if a not in history:
+                    print(a)
+                    history.append(a)
+                    i += 1
+                
+            except StopIteration:
+                break
+            
     
     
 if __name__ == '__main__':
-    a = PySet(lambda x:x%2==0)  # {x|x는 짝수}
+    a = PySet(lambda x:x%2==0)  # {x|x is even}
     b = PySet(lambda x:x in [1,2,3]) # {1,2,3}
 
     c = a+b

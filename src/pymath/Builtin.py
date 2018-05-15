@@ -8,8 +8,7 @@ def integer_generator():
         yield i
         i += 1
         yield -1*i
-            
-        
+    
 PyInt = PyCountableSet(integer_generator)
 
 def rational_generator():
@@ -19,6 +18,7 @@ def rational_generator():
     while True:
         yield i
         i = 1/(2*floor(i)-i+1)
+
 PyRational = PyCountableSet(rational_generator)
 
 if __name__ == '__main__':

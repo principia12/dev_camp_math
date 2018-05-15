@@ -2,8 +2,16 @@
 *.aux 
 *.out
 *.log
+*.bbl
+*.blg
+*.toc
 
 # python related files
 __pycache__
 *.pyc
 
+# simple memos 
+memo.txt
+
+# batch file for windows
+*.bat
