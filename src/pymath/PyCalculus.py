@@ -26,10 +26,10 @@ def differentiate(formula,
             res.datum = cur_tree.datum
             if cur_tree.datum[1] == '+':
                 for child in cur_tree.children:
-                    res.children.append(differentiate(child, *args).tree)
+                    res.children.append(differentiate(child, *args).tree.copy())
             if cur_tree.datum[1] == '-':
                 for child in cur_tree.children:
-                    res.children.append(differentiate(child, *args).tree)
+                    res.children.append(differentiate(child, *args).tree.copy())
             if cur_tree.datum[1] == '*':
                 res.datum = ('op', '+')
                 diff_children = [differentiate(c, *args).tree.copy() \
@@ -47,7 +47,22 @@ def differentiate(formula,
                     res.children.append(Tree(('op', '*'), t))
                 
             if cur_tree.datum[1] == '/':
-                pass
+                # for simplicity, assume binary 
+                f,g = cur_tree.children
+                df = differentiate(f, *args).tree
+                dg = differentiate(g, *args).tree
+                '''
+                res =\
+                Tree(('op', '/'), 
+                        [ 
+                         Tree(('op', '+'), 
+                                 [Tree(('op', '*'), 
+                                          [dg, 
+                                           Tree(('func', 'ln'), [f])]),
+                                  Tree(('op', '/'),
+                                          [Tree(('op', '*'), [g,df]),
+                                           f,])])])
+                '''
             if cur_tree.datum[1] == '^':
                 # for simplicity, assume binary
                 f,g = cur_tree.children
@@ -98,11 +113,11 @@ if __name__ == '__main__':
         print('==================')
         print('formula')
         print(formula.tree)
-        print('tree2str')
+        #print('tree2str')
         #print(type(differentiate(formula).formula))
         print(differentiate(formula))
-        print(formula.tree)
-        print('tree')
+        #print(formula.tree)
+        #print('tree')
         #print(differentiate(formula).tree)
         print('==================')
         

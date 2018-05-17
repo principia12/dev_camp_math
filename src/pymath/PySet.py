@@ -2,8 +2,8 @@ from global_variables import *
 
 class PySet:
     def __init__(self, 
-                    membership, # membership checking 아리랑
-                    eq_func,): # equivalance checking function between elements
+                    membership, # membership checking 
+                    eq_func = lambda x,y:x==y,): # equivalance checking function between elements
         self.membership = membership
         self.eq_func = eq_func
         

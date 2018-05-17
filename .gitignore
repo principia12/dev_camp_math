@@ -5,6 +5,7 @@
 *.bbl
 *.blg
 *.toc
+*.synctex.gz
 
 # python related files
 __pycache__
