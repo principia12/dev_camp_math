@@ -9,10 +9,13 @@ import math
 # Formula Class
 #-------------------------------------
 
-class PyFormula(): # might inherit from PyFunction class
+class PyFormula: # might inherit from PyFunction class
     ''' Function from PyRational to PyRational
     '''
-    def __init__(self, formula):
+    def __init__(self, 
+                    formula, 
+                    constant_variable = [], 
+                    debug = False):
         if isinstance(formula, str):
             self.formula = formula
             tree = parse(tokenize(formula))
@@ -21,13 +24,12 @@ class PyFormula(): # might inherit from PyFunction class
             self.variables = PyCountableSet(lambda :(x for x in var_list))
         elif isinstance(formula, Tree):
             self.tree = formula
-            self.formula = tree2str(formula)
+            self.formula = PyFormula._tree2str(formula)
             var_list = [x[1] for x in formula.nodes() if x[0] == 'var']
             self.variables = PyCountableSet(lambda :(x for x in var_list))
         else:
             print('Input should be either tree or a string.')
             raise TypeError
-           
         
     def __add__(self, other): 
         return PyFormula('(' + self.formula + ')+(' + other.formula + ')',)
@@ -49,6 +51,12 @@ class PyFormula(): # might inherit from PyFunction class
             return self.tree.children
         return self        
     
+    def _expand(self):
+        pass
+        
+    def _factorization(self):
+        pass
+        
     def simplify(self):
         var_coeff_dict = {}
         
@@ -83,45 +91,66 @@ class PyFormula(): # might inherit from PyFunction class
             args = [PyFormula._calculate(c, value_dict) for c in tree.children]
             return FUNCTION_DICT[tree.datum[1]](args)
     
-        
+    @staticmethod
+    def _tree2str(tree):
+        res = ''
+        #if tree.children == []:
+        #    return str(tree.datum[1])
+        if tree.datum[0] == 'op':
+            if tree.children != []:
+                if tree.datum[1] == '*':
+                    for child in tree.children:
+                        if child.children == []:
+                            res += str(child.datum[1])
+                        elif child.datum[0] == 'func':
+                            res += '%s'%PyFormula._tree2str(child)
+                        else:
+                            res += '(%s)'%PyFormula._tree2str(child)
+                        res += '*'
+                    res = res.strip('*')
+                elif tree.datum[1] == '/':
+                    denom, numer = '', ''
+                    for idx, child in enumerate(tree.children):
+                        if idx%2 == 0:
+                            if child.children == []:
+                                denom += str(child.datum[1])
+                            else:
+                                denom += '(%s)'%PyFormula._tree2str(child)
+                        else:
+                            if child.children == []:
+                                numer += str(child.datum[1])
+                            else:
+                                numer += '(%s)'%PyFormula._tree2str(child)
+                                
+                    res = '%s/%s'%(denom, numer)
+                else:
+                    for idx, child in enumerate(tree.children):
+                        if child.children == []:
+                            res += str(child.datum[1])
+                        else:
+                            res += '(%s)'%PyFormula._tree2str(child)
+                        if idx != len(tree.children)-1:
+                            res += str(tree.datum[1])
+            else:
+                res = str(tree.datum[1])
+        elif tree.datum[0] == 'func':
+            res += str(tree.datum[1])
+            res += '('
+            for child in tree.children:
+                res += '%s, '%PyFormula._tree2str(child)
+            res = res.strip(', ')
+            
+            res += ')'
+        elif tree.datum[0] in ['num', 'var']:
+            res = str(tree.datum[1])
+            
+        return res    
 
 
 #-------------------------------------
-# global variables
+# variables for this 
 #-------------------------------------
 
-debug = False
-
-OPERATIONS = {\
-    '+' : 1, 
-    '-' : 1, 
-    '*' : 2, 
-    '/' : 2, 
-    '^' : 3, 
-    } 
-              
-OPERATION_WITH_FUNCTIONS = {\
-    '+' : binary2nary(lambda x,y : x+y),
-    '*' : binary2nary(lambda x,y : x*y), 
-    '/' : binary2nary(lambda x,y : x/y), 
-    '-' : binary2nary(lambda x,y : x-y),
-    '^' : binary2nary(lambda x,y : x**y),
-    }
-
-PARA = ['(', ')', '[', ']', '{', '}',]
-
-FUNCTION_DICT = {\
-    'cos' : math.cos, 
-    'sin' : math.sin, 
-    'tan' : math.tan, 
-    'cosh' : math.cosh,
-    'sinh' : math.sinh,
-    'tanh' : math.tanh,
-    'e' : lambda : math.e, 
-    'pi' : lambda : math.pi, 
-    'ln' : math.log,
-    'log' : math.log10,
-    }
 
 #-------------------------------------              
 # auxilliary functions
@@ -231,26 +260,7 @@ def parse_args(tokens):
             res[-1].append(tok)
     return [parse(e) for e in res]
     
-def tree2str(tree):
-    res = ''
-    if tree.datum[0] == 'op':
-        if tree.children != []:
-            for child in tree.children[:-1]:
-                res += '(%s)'%tree2str(child)
-                res += str(tree.datum[1])
-            res += '(%s)'%tree2str(tree.children[-1])
-        else:
-            res = str(tree.datum[1])
-    elif tree.datum[0] == 'func':
-        res += str(tree.datum[1])
-        res += '('
-        for child in tree.children:
-            res += '%s, '%tree2str(child)
-        res += ')'
-    elif tree.datum[0] in ['num', 'var']:
-        res = str(tree.datum[1])
-        
-    return res
+
     
 #-------------------------------------              
 # parsing functions
@@ -297,10 +307,7 @@ def tokenize(equation):
             
             res.append(('para', c))
         elif c in [str(e) for e in range(9)] or c == '.':
-            
             if minus_flag and len(res) == 0 :
-                #res.append(('num', '-1'))
-                #res.append(('op', '*')), 
                 res.append(('num', '-%s'%c))
                 minus_flag = False
             elif minus_flag and res[-1][0] == 'num':
@@ -325,19 +332,21 @@ def tokenize(equation):
 def parse(tokens, debug = False):
     ''' Parse tokens to a binary tree
     '''
-    cur_tree = Tree((None, None))
+    
+    cur_tree = Tree((None, None), children = [])
     empty_flag = []
     pass_flag = -1
     para_flag = []
-    
     for idx, token in enumerate(tokens):
         if debug:
             if idx<pass_flag and False:
-                print('-------------')
-                print(idx, token)
+                #print('-------------')
+                #print(idx, token)
+                pass
             else:
                 print('-------------')
                 print(idx, token)    
+                print('cur tree before parse')
                 print(cur_tree)
                 print('para flag')
                 for e in para_flag:
@@ -371,7 +380,9 @@ def parse(tokens, debug = False):
                 else:
                     cur_tree = Tree(('op', '*'), [cur_tree, Tree(token)])
             else:
-                cur_tree = Tree(token)
+                # below two lines behave differently. why? 
+                # cur_tree = Tree(token) 
+                cur_tree = Tree(token, children = [])
                 
         elif tok_type == 'op':
             if cur_tree.datum[0] in ['var', 'num', 'func']:
@@ -396,6 +407,7 @@ def parse(tokens, debug = False):
                             cur_pos.children = [tmp]
                             cur_pos.datum = token
                         else:
+                            print('sth wrong')
                             raise TypeError
                         empty_flag.append(cur_pos)
                     else: 
@@ -453,13 +465,15 @@ def parse(tokens, debug = False):
             else:
                 cur_tree = func_tree
         else:
+            print('sth wrong')
             raise TypeError
             
-        if debug:
-            print(cur_tree)
-            print('-------------')
+        # if debug:
+            # print(cur_tree)
+            # print('-------------')
     if debug:
-        print(eq)
+        print('cur tree after parse')
+        print(cur_tree)
     return cur_tree
    
     
@@ -590,6 +604,8 @@ if __name__ == '__main__':
     formula8 = 'sin(cos(tan(x)))'
     formula9 = 'sin(x) * cos(y) - cos(x) * sin(y)'
     formula10 = 'a+b+C+d+e+f+g+h'
+    formula11 = '1'
+    formula12 = '0 '
     
     for i in range(100):
         try:

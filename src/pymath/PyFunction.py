@@ -3,7 +3,7 @@ from PySet import PySet, PyCountableSet
 class PyFunction(PySet):
     def __init__(self, domain, # domain of a function 
                        func_range, # range of a function 
-                       f, ): 
+                       f, ): # relationship 
         def member(args):
             x,y = args
             return domain.membership(x) and func_range.membership(y) and \
@@ -12,6 +12,13 @@ class PyFunction(PySet):
         self.domain = domain
         self.func_range = func_range
         self.f = f
+        
+    def composition(self, other):
+        X = self.domain
+        Y = other.func_range
+        g, h = self.f, other.f
+        
+        return Pyfunction(X, Y, lambda x:h(g(x)))
         
     def calculate(self, args):
         assert self.domain.membership(args)

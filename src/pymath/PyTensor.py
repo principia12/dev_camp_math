@@ -9,9 +9,6 @@ class Tensor:
                     data = [], # should be list-like data type
                     ):
         # assert shape 
-        
-        
-        
         self.data = data
         
                         

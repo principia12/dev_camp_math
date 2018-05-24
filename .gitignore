@@ -6,6 +6,9 @@
 *.blg
 *.toc
 *.synctex.gz
+*.synctex(busy)
+*.nav
+*.snm
 
 # python related files
 __pycache__

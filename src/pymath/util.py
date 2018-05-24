@@ -12,11 +12,13 @@ class Tree:
                  _name = ''):    
         self.datum = datum 
         assert not isinstance(self.datum, Tree), '\n' + str(self.datum)
+        '''
         for idx, child in enumerate(children):
             if isinstance(child, Tree):
-                pass
+                children[idx] = child
             else:
                 children[idx] = Tree(child)
+        '''
         self.children = children
         
     def __str__(self):
@@ -96,6 +98,65 @@ class Tree:
         from copy import deepcopy 
         return deepcopy(self)
         
+        
+'''
+Graph datastructure 
+'''
+
+class Graph:
+    def __init__(self, V, E, is_directed = True):
+        for from_node, to_node in E:
+            assert from_node in V
+            assert to_node in V, to_node
+            
+        self.V = V
+        self.E = E
+        
+    def adjacency_list(self):
+        res = {}
+        for v in V:
+            res[v] = [[],[]]
+        for from_node, to_node in E:
+            pass
+        
+    def adjacency_matrix(self):
+        pass
+        
+    def have_cycle(self):
+        pass
+    
+    def dfs(self):
+        pass
+     
+    def bfs(self):
+        pass
+        
+    def topological_sort(self):
+        # implementation of Kahn's algorithm for topological sort 
+        res = []
+        starting_nodes = []
+        to_nodes = [e[1] for e in self.E]
+        edges = [e for e in self.E]
+        
+        for v in self.V:
+            if v not in to_nodes:  
+                starting_nodes.append(v)
+        
+        while len(starting_nodes) != 0:
+            n = starting_nodes.pop()
+            res.append(n)
+            for e in self.E:
+                if e[0] == n:
+                    m = e[1]
+                    edges.remove(e)
+                    if m not in [e[1] for e in edges]:
+                        starting_nodes.append(m)
+            
+        if edges != []:
+            assert False, 'Something Wrong!' 
+        else:
+            return res
+        
 #-------------------------------------------------------
 # Auxilliary Functions 
 #-------------------------------------------------------
@@ -108,6 +169,15 @@ def binary2nary(func):
         return res
     return res_func
     
+def generator2membership(generator):
+    def membership(args):
+        a = generator()
+        i = 0
+        while i<MAXIMUM_ITERATION:
+            if args == next(a):
+                return True
+            i += 1
+    return membership
     
 if __name__ == '__main__':
     
@@ -171,11 +241,18 @@ if __name__ == '__main__':
     t4.append_to_subtree(100, t4)
     print(t4)
     
+    # copy test
+    print('==================')
+    print('copy test')
+    print(t4)
+    t5 = t4.copy()
+    print(t5)
+    
     #-------------------------------------------------------
     # Auxilliary Functions Test
     #-------------------------------------------------------
     
     # binary_to_nary_func test 
-    
+    print('==================')
     f = binary2nary(lambda x,y :x+y)
     print(f(1,2,3,4,5))
