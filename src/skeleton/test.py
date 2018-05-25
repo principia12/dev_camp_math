@@ -1,7 +1,6 @@
 import os
 import sys
 
-from PyFormula import *
 from PySet import *
 
 # source code for testing
@@ -98,11 +97,6 @@ if __name__ == '__main__':
                 i = 1/(2*floor(i)-i+1)
 
         PyRational = PyCountableSet(rational_generator)
-        print('---------------------')
-        if noisy:
-            print('Testing PyCountableSet.list_elements')    
-        PyInt.list_elements()
-        PyRational.list_elements()
         print('---------------------')
         if noisy:
             print('Testing PyFiniteSet')

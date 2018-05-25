@@ -178,9 +178,9 @@ This lecture is \textbf{NOT} about...
 기본적으로 컴퓨터나 우리의 시간은 유한하므로, 무한을 다루는 것은 불가능합니다. 따라서 우리는 무한을 다음과 같은 근사적인 형태로 다룹니다. 
 
 \begin{itemize}
-\item 최대 수를 정해놓고 유한으로 근사하기 
-\item semi-decidable loop 사용 
 \item lazy evaluation 사용 : 파이썬에서 제공하므로 명시적으로 구현할 필요는 없음
+\item semi-decidable loop 사용 
+\item 최대 수를 정해놓고 유한으로 근사하기 
 \end{itemize}
 
 \end{frame}
@@ -412,7 +412,7 @@ $a_nx^n + a_{n-1}x^{n-1} + ... + a_1 x^1 + a_0 = \sum^{n}_{i=0} a_i x^i$
 \end{frame}
 
 \begin{frame}{삼각함수의 합차공식}
-세 변의 길이가 a,b,c인 삼각형에 대해서 
+
 \begin{itemize}
 \item $sin(x+y) = sin(x)cos(y) + sin(y)cos(x)$
 \item $cos(x+y) = cos(x)cos(y) - sin(x)sin(y)$
@@ -429,7 +429,7 @@ $a_nx^n + a_{n-1}x^{n-1} + ... + a_1 x^1 + a_0 = \sum^{n}_{i=0} a_i x^i$
 정수 n,m에 대해서 다음이 성립합니다. 
 
 \begin{itemize}
-\item $x^n x^m = x^(n+m)$
+\item $x^n x^m = x^{n+m}$
 \item $\frac{x^n}{x^m} = x^{n-m}$
 \item $(x^n)^m = x^{nm}$
 \end{itemize}
@@ -439,16 +439,29 @@ $a_nx^n + a_{n-1}x^{n-1} + ... + a_1 x^1 + a_0 = \sum^{n}_{i=0} a_i x^i$
 \begin{frame}{지수함수}
 지수법칙을 실수로 연장하여 생각하면, 다음과 같은 함수를 생각할 수 있습니다. 
 \begin{block}{지수함수}
-상수 a에 대해서, 다음과 같은 함수를 지수함수라고 합니다. $f(x) = a^x$
-
+양의\footnote{음의 경우는 다루지 않습니다.} 상수 a에 대해서, 다음과 같은 함수를 지수함수라고 합니다. $f(x) = a^x$
 \end{block}
-여기서 a를 함수의 밑이라고 합니다. 지수함수는 지수법칙의 연장이므로, 지수법칙이 성립합니다. 
 \end{frame}
 
 \begin{frame}{지수함수}
 \includegraphics[width=\textwidth]{exp}
 \end{frame}
 
+\begin{frame}{로그함수} 
+\begin{block}{로그함수}
+양의\footnote{음의 경우는 다루지 않습니다.} 상수 a에 대해서, 다음과 같은 함수를 지수함수라고 합니다. $y = log_{a} x$ 이면 $ x = y^a$
+\end{block}
+로그함수와 지수함수는 역함수 관계입니다. 
+
+\end{frame}
+
+\begin{frame}{로그함수의 성질} 
+\begin{itemize} 
+\item $log MN = log M + log N$
+\item $log (M/N) = log M - log N$
+\item $log M^k = k log M $
+\end{itemize}
+\end{frame}
 
 \end{document}
 

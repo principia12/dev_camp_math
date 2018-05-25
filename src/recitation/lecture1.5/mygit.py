@@ -124,6 +124,8 @@ if __name__ == '__main__':
                 para.append(func)
                 
         if func == 'init':
+            if os.path.exists(os.path.
+                assert False,'Already 
             try:
                 root_dir = para[0]
             except IndexError:
