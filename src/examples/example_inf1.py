@@ -8,7 +8,6 @@ def sqrt2(digit):
     i = 1
     while i!=digit:
         for j in range(11):
-            print(i,j, 'a')
             if (lower_limit + j*10**(-i))**2 > 2:
                 lower_limit += (j-1)*10**(-i)
                 i += 1
@@ -20,7 +19,6 @@ def root2(digit):
     i = 1
     while i!=digit:
         for j in range(11):
-            #print(i,j, 'a')
             if (lower_limit + j*10**(-i))**2 > 2:
                 lower_limit += (j-1)*10**(-i)
                 i += 1
@@ -38,7 +36,6 @@ def const(digit):
 def test_equal(l, r):
     i = 1
     while True:
-        print(i, l(i), r(i))
         if l(i) == r(i):
             i += 1
         else:
@@ -46,6 +43,6 @@ def test_equal(l, r):
         
     
 if __name__ == '__main__':
-    print(sqrt2(20))
+    print(sqrt2(10))
     print(test_equal(const, sqrt2))
     print(test_equal(sqrt2, root2))

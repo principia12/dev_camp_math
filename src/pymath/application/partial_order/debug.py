@@ -42,7 +42,8 @@ def construct_poset(root_dir):
     def cmp_file(l, r):
         l = os.path.join(root_dir, l)
         r = os.path.join(root_dir, r)
-        cond1 = os.path.split(r)[-1] in get_imported_files(l) 
+        cond1 = os.path.split(r)[-1] in \
+                    get_imported_files(l) 
         cond2 = os.path.split(l)[-1] in get_imported_files(r) 
         
         if cond1:

@@ -6,9 +6,13 @@ class Tensor:
         data -- content of 
     '''
     def __init__(self, 
-                    data = [], # should be list-like data type
-                    ):
+                    data = [],): # should be list-like data type
+
         # assert shape 
         self.data = data
         
-                        
+    def __add__(self, other):
+        pass
+        
+    def __mul__(self, other):
+        pass

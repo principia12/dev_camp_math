@@ -289,6 +289,7 @@ class PyPartiallyOrderedSet(PyCountableSet):
             
     
 if __name__ == '__main__':
+    '''
     a = PySet(lambda x:x%2==0)  # {x|x is even}
     b = PySet(lambda x:x in [1,2,3]) # {1,2,3}
     f = PyFiniteSet([1,2,3])
@@ -311,4 +312,5 @@ if __name__ == '__main__':
     print(f.membership(200))
     
     print(isinstance(f, PySet))
+    '''
     
