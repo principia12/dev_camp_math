@@ -1,6 +1,7 @@
 import os
 import sys
-import math ;from util import *
+import math 
+from util import binary2nary
 
 MAXIMUM_ITERATION = 10000
 DEBUG = False
