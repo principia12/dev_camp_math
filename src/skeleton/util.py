@@ -1,5 +1,66 @@
-from global_variables import *
+#from global_variables import *
 
+
+
+'''
+Stack ADT
+'''
+
+class Stack:
+    def __init__(self, *initial_data, datastructure = 'list'):
+        self.data = list(initial_data)
+        
+    def is_empty(self):
+        return len(self.data) == 0
+        
+    def push(self, *elem):
+        self.data.extend(elem)
+        
+    def pop(self):
+        assert not self.is_empty()
+        head, tail = self.data[:-1], self.data[-1]
+        self.data = head
+        
+        return tail
+        
+    def top(self):
+        if self.is_empty():
+            return None
+        return self.data[-1]
+        
+    def size(self):
+        return len(self.data)
+        
+    def __str__(self):
+        res = 'Stack'
+        for elem in self.data:
+            res += ' %s'%str(elem)
+        return res
+
+'''
+Queue ADT
+'''
+
+class Queue:
+    def __init__(self, *initial_data, datastructure = 'list'):
+        self.data = list(initial_data)
+        
+    def is_empty(self):
+        return len(self.data) == 0
+        
+    def push(self, *elem):
+        self.data.extend(elem)
+        
+    def pop(self):
+        assert not self.is_empty()
+        head, tail = self.data[0], self.data[1:]
+        self.data = tail
+        return head
+    def __str__(self):
+        res = 'Stack'
+        for elem in self.data:
+            res += ' %s'%str(elem)
+        return res            
 
 '''
 Tree datastructure 
@@ -282,6 +343,38 @@ def generator2membership(generator):
                 return True
             i += 1
     return membership
+    
+def isnumber(x):
+    return isinstance(x, (int, long, float, complex))
+    
+escape_dict={'\a':r'\a',
+           '\b':r'\b',
+           '\c':r'\c',
+           '\f':r'\f',
+           '\n':r'\n',
+           '\r':r'\r',
+           '\t':r'\t',
+           '\v':r'\v',
+           '\'':r'\'',
+           '\"':r'\"',
+           '\0':r'\0',
+           '\1':r'\1',
+           '\2':r'\2',
+           '\3':r'\3',
+           '\4':r'\4',
+           '\5':r'\5',
+           '\6':r'\6',
+           '\7':r'\7',
+           '\8':r'\8',
+           '\9':r'\9'}
+
+def str2raw(text):
+    '''Returns a raw string representation of text'''
+    new_string=''
+    for char in text:
+        try: new_string+=escape_dict[char]
+        except KeyError: new_string+=char
+    return new_string
     
 if __name__ == '__main__':
     

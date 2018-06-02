@@ -19,3 +19,14 @@ memo.txt
 
 # batch file for windows
 *.bat
+
+# tmp files 
+tmp*.py
+
+# swap files 
+*.swp
+
+# too many images 
+**/lecture\ 2/img/*.png
+**/lecture\ 2/img/**/*.png
+
