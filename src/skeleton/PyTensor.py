@@ -5,16 +5,27 @@ class PyVector:
     ''' Vector class. 
     '''
     def __init__(self, *data): # should be list-like data type
-        self.data = []
-        self.shape = []
+        # PyVector(1,2,3)
+        # PyVector(PyFormula('x+y'), 1, 2)
+        for elem in data:
+            assert isinstance(elem, PyFormula) or isnumber(elem)
+        self.data = data
+        self.shape = (len(data), 1)
     
     # for vec[i] syntax
     def __iter__(self):
-        pass
+        # v = PyVector(1,2,3)
+        # v[1] = 2
+        yield from self.data
         
     # check if vector is numeric
     def is_numeric(self):
-        pass
+        res = True
+        for elem in self.data:
+            res = res and isnumber(elem)
+        return res
+        
+        #return all(list(filter(lambda x:isnumber(x), self.data)))
         
     # implement vector as function 
     def __call__(self, *value_list, **value_dict):
@@ -24,19 +35,26 @@ class PyVector:
     def __add__(self, other):
         assert isinstance(other, self.__class__)
         assert self.size() == other.size()
-        pass
+        # return PyVector(*[x+y for zip(self.data, other.data)])
+        res = []
+        for i in range(self.size()):
+            res.append(self.data[i] + other.data[i])
+        return PyVector(*res)
         
     def __sub__(self, other):
         assert isinstance(other, self.__class__)
         assert self.size() == other.size()
-        pass
+        res = []
+        for i in range(self.size()):
+            res.append(self.data[i] - other.data[i])
+        return PyVector(*res)
         
     def __mul__(self, other):
         if isinstance(other, self.__class__):
             assert self.size() == other.size()
-            pass
+            return PyVector.inner_product(self, other)
         elif isinstance(other, PyFormula) or isnumber(other):
-            pass
+            return PyVector(*[e*other for e in self.data])
         elif isinstance(other, Matrix):
             pass
         else:
@@ -48,27 +66,28 @@ class PyVector:
         assert isinstance(l, PyVector)
         assert isinstance(r, PyVector)
         assert l.size() == r.size()
-        pass
+        return sum([x*y for x,y in zip(l,r)])
         
     def norm(self):
         import math
         if self.is_numeric():
-            pass
+            import math
+            return math.sqrt(PyVector.inner_product(self, self))
         else:
-            pass
+            return lambda *args, **kargs:math.sqrt(PyVector.inner_prodcut(self.self)(*args, **kargs)**2)
     @staticmethod    
     def is_orthogonal(l, r):
         assert isinstance(l, PyVector)
         assert isinstance(r, PyVector)
         assert l.size() == r.size()
-        pass
+        return PyVector.inner_product(l,r) == 0
     
     @staticmethod    
     def cosine_similarity(l, r):
         assert isinstance(l, PyVector)
         assert isinstance(r, PyVector)
         assert l.size() == r.size()
-        pass
+        return PyVector.inner_product(l,r)/(l.norm()*r.norm())
     
     # cross product
     @staticmethod

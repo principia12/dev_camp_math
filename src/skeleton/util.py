@@ -1,4 +1,4 @@
-#from global_variables import *
+from global_variables import *
 
 
 
@@ -14,6 +14,8 @@ class Stack:
         return len(self.data) == 0
         
     def push(self, *elem):
+        # a = Stack()
+        # a.push(1,2,3)
         self.data.extend(elem)
         
     def pop(self):
@@ -101,6 +103,16 @@ class Tree:
         return NotImplemente
     
     def __str__(self):
+        '''
+        Tree(1, [Tree(2, 
+                    [Tree(4),  Tree(5)]), 
+                Tree(3)])
+        1
+            2
+                4
+                5
+            3
+        '''
         res = str(self.datum)
         for child in self.children:
             res += '\n\t' + str(child).replace('\n', '\n\t')

@@ -12,28 +12,118 @@ import re
 
 class PyFormula: 
     def __init__(self, eq, ):
-        pass
+        if isinstance(eq, Tree):
+            self.tree = eq
+            self.eq = PyFormula._tree2str(eq)
+            
+        elif isinstance(eq, str):
+            self.tree = parse(eq)
+            self.eq = eq
+        vars = []
+        for node in self.tree.nodes():
+            if node.datum[0] == 'var': # tok_type, tok
+                vars.append('x')
+        
+        self.variables = PyFiniteSet(*vars)
+        
         
     def __add__(self, other): 
-        pass
+        return PyFormula(Tree('+', [self.tree, other.tree]))
     
     def __sub__(self, other):
-        pass
+        return PyFormula(Tree('-', [self.tree, other.tree]))
     
     def __mul__(self, other):
-        pass
+        return PyFormula(Tree('*', [self.tree, other.tree]))
 
     def __div__(self, other):
-        pass
+        return PyFormula(Tree('/', [self.tree, other.tree]))
         
     def __str__(self):
-        pass
+        return self.eq
         
     def __call__(self, *value_list, **value_dict):
-        pass
+        if len(value_list) != 0:
+            assert value_dict is None # is / == 
+            
+            variables = self.variable.elements
+            assert len(value_list) == len(variables)
+            sort(variables)
+            value_dict = {}
+            i = 0
+            for var in variables:
+                value_dict[var] = value_list[i]
+                i += 1
+            return PyFormula._calculate(self, value_dict)
+        else:
+            assert len(value_list) == 0
+            variables = self.variable.elements
+            assert len(list(value_dict.keys())) == len(variables)
+            
+            return PyFormula._calculate(self, value_dict)
     @staticmethod    
     def _calculate(tree, value_dict):
-        pass
+        if tree.datum[0] == 'num':
+            return float(tree.datum[1])
+        elif tree.datum[0] == 'op':
+            return OPERATION_WITH_FUNCTIONS[op](*[c._calculate(value_dict) \
+                                                    for c in tree.children])
+        elif tree.datum[0] == 'var':
+            var = tree.datum[1]
+            if var in value_dict.keys():
+                return float(value_dict[var]) 
+            else:
+                assert False, 'No value assigned for variable %s'%var
+        else:
+            assert False, 'Not a valid node; %s'%str(tree.datum)
+        
+    @staticmethod
+    def _tree2str(tree):
+        res = ''
+        #if tree.children == []:
+        #    return str(tree.datum[1])
+        if tree.datum[0] == 'op':
+            if tree.children != []:
+                if tree.datum[1] == '*':
+                    for child in tree.children:
+                        if child.children == []:
+                            res += str(child.datum[1])
+                        elif child.datum[0] == 'func':
+                            res += '%s'%PyFormula._tree2str(child)
+                        else:
+                            res += '(%s)'%PyFormula._tree2str(child)
+                        res += '*'
+                    res = res.strip('*')
+                elif tree.datum[1] == '/':
+                    denom, numer = '', ''
+                    for idx, child in enumerate(tree.children):
+                        if idx%2 == 0:
+                            if child.children == []:
+                                denom += str(child.datum[1])
+                            else:
+                                denom += '(%s)'%PyFormula._tree2str(child)
+                        else:
+                            if child.children == []:
+                                numer += str(child.datum[1])
+                            else:
+                                numer += '(%s)'%PyFormula._tree2str(child)
+                                
+                    res = '%s/%s'%(denom, numer)
+                else:
+                    for idx, child in enumerate(tree.children):
+                        if child.children == []:
+                            res += str(child.datum[1])
+                        else:
+                            res += '(%s)'%PyFormula._tree2str(child)
+                        if idx != len(tree.children)-1:
+                            res += str(tree.datum[1])
+            else:
+                res = str(tree.datum[1])
+        elif tree.datum[0] in ['num', 'var']:
+            res = str(tree.datum[1])
+            
+        return res    
+
     
 '''
 6/02 Coding Practice 
@@ -117,14 +207,39 @@ precedence = {\
     '^' : 3, }
     
 def tokenizer(equation):
+    left = equation 
     tokens = {\
         'op' : ['^', '+', '-', '*', '+', '/'],
         'para' : ['(', ')'],
-        'num' : [r"[1-9][0-9]*\.?[0-9]*|0",], # 0 is also a number! 
-        'var' : [r"[a-zA-Z]+_?[0-9]*",], } # x_0 format also allowed
+        'num' : [r"[1-9][0-9]*\.?[0-9]*|0",],
+        'var' : [r"[a-zA-Z]+_?[0-9]*",], }
     tok_strings = tokens['op'] + \
         tokens['para'] + tokens['num'] + tokens['var']
     
+    def find_key_from_elem(d, e):
+        for k in d.keys():
+            if e in d[k]:
+                return k
+        
+    
+    while left != '':
+        for tok in tok_strings:
+            if tok in tokens['num']:
+                if re.match(tok, left) is not None:
+                    m = re.match(tok, left)
+                    yield (('num', left[m.start():m.end()]))
+                    left = left[m.end():]
+            elif tok in tokens['var']:
+                if re.match(tok, left) is not None:
+                    m = re.match(tok, left)
+                    yield (('var', left[m.start():m.end()]))
+                    left = left[m.end():]
+            else:
+                if left.startswith(tok):
+                    k = find_key_from_elem(tokens, tok)
+                    yield (k, left[0])
+                    left = left[1:]
+                    
     
 def recursive_descent(tokens):
     operator = Stack()
@@ -134,8 +249,83 @@ def recursive_descent(tokens):
     
     return res
     
+def expr(operator, operand, tokens, idx):
     
-def parse(eq):
+    idx = part(operator, operand, tokens, idx)
+    idx += 1
+    if idx != len(tokens):        
+        next_tok = tokens[idx]
+        
+        while next_tok[1] in ['^', '+', '-', '*', '/']:
+            push_operator(operator, operand, next_tok)
+            idx += 1
+            idx = part(operator, operand, tokens, idx)
+            idx += 1
+            try:
+                next_tok = tokens[idx]
+            except IndexError:
+                next_tok = [None, None]
+    
+    while not operator.is_empty():
+        pop_operator(operator, operand)
+        
+    return idx
+        
+def find_match(tokens, t_idx):
+    tok_type, tok = tokens[t_idx]
+    
+    assert tok_type == 'para' and tok == '(', \
+            'Should find for paranthesis matching.' 
+    cnt = 0 
+    
+    for idx, elem in enumerate(tokens[t_idx:]):
+        token_type, token = elem
+        if token == tok:
+            cnt += 1
+        elif token == ')':
+            cnt -= 1
+        
+        if cnt < 0:
+            assert False, 'Paranthesis matching error!'
+        if cnt == 0:
+            return idx + t_idx
+    return len(tokens)+1
+    
+def part(operator, operand, tokens, idx):
+    next_tok = tokens[idx]
+    
+    if next_tok[0] == 'num' or next_tok[0] == 'var':
+        operand.push(Tree(datum=next_tok))
+    elif next_tok[1] == '(':
+        tokens_in_para = tokens[idx+1:find_match(tokens, idx)]
+        e = recursive_descent(tokens_in_para)
+        idx = find_match(tokens, idx) 
+        operand.push(e)
+        tokens = tokens[idx:]
+    else:
+        assert False, 'Something wrong at %s'%str(tokens[idx])
+    return idx
+    
+def pop_operator(operator, operand):
+    top = operator.pop()
+    if top[1] in ['+', '*', '/', '^', '-']:
+        arg1 = operand.pop()
+        arg2 = operand.pop()
+        operand.push(Tree(datum = top, children = [arg2, arg1]))
+    else:
+        assert False, 'operator expected; not a valid operator %s'%str(top)
+
+def push_operator(operator, operand, op):
+    if not operator.is_empty():
+        top = operator.top()
+        while precedence[top[1]] > precedence[op[1]]:
+            pop_operator(operator, operand)
+            top = operator.top()
+            if top is None:
+                break
+    operator.push(op)
+    
+def parse(eq):  
     return recursive_descent(list(tokenizer(eq)))
         
 if __name__ == '__main__':
@@ -144,7 +334,7 @@ if __name__ == '__main__':
     
     # simple numbers
     eq1 = '(1)'
-    eq2 = '3'
+    eq2 = '-3'
     
     # +,- 
     eq4 = '1+1'
@@ -193,7 +383,4 @@ if __name__ == '__main__':
         print('=============')
     eq = PyFormula(eq37)
     print(eq(1,2,3))
-    print(eq(x_0 = 1, y = 2, z = 3)) 
-    
-    
-    
+    print(eq(x = 1, y = 2, z = 3)) 

@@ -256,9 +256,9 @@ def inner_product(l,r):
        
 if __name__ == '__main__':
     #basic_fft_example()
-    '''
-    # alphabet decoding/encoding test
     
+    # alphabet decoding/encoding test
+    '''
     alphabet = 'abcdefghijklmnopqrstuwxyz '
     tmp = []
     for c in alphabet:
@@ -271,13 +271,13 @@ if __name__ == '__main__':
     print(bin2string(string2bin(alphabet)))
     print(alphabet)
     '''
-    '''
+    
     # simple modulation test - single client 
     alphabet = 'abcdefghijklmnopqrstuwxyz '
-    res = decode_signal(*modulation(5, 10, string2bin('hi')), quiet = False)
+    res = decode_signal(*modulation(5, 10, string2bin('hi'), quiet = False), quiet = False)
     print(res)
     print(bin2string(res))
-    '''
+    
     '''
     # sending signals to multiple clients
     alphabet = 'abcdefghijklmnopqrstuwxyz '
@@ -305,7 +305,7 @@ if __name__ == '__main__':
         res = decode_signal(y, t, client_id = i, client_window_width = 5, 
                     client_num = len(client_list), quiet = True)
         print('decoded signal : %s'%bin2string(res))
-    '''    
+    '''
     
     
     
