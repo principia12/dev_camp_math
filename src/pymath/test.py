@@ -3,20 +3,23 @@ import sys
 
 from PyFormula import *
 from PySet import *
+from PyTensor import *
 
 # source code for testing
 
 if __name__ == '__main__':
     default = False
+    quiet = False
     if len(sys.argv) == 1:
         default = True
+        quiet = True
     elif len(sys.argv) >= 3:
         quiet = sys.argv[2] == 'q'
     else:
         quiet = False
     noisy = not quiet
     
-    if default or sys.argv[1] == 'set':
+    if sys.argv[1] == 'set':
         print('Testing PySet Module')
         print('---------------------')
         if noisy:
@@ -199,3 +202,80 @@ if __name__ == '__main__':
             print(lecture[0])
         print('---------------------')
         print('Passed All Tests')
+    
+    if default or sys.argv[1] == 'vec':    
+        a = PyVector(1,2,3)
+        b = PyVector(4,5,6)
+        c = PyVector(7,8,9)
+        print(a)
+        print(b)
+        print(a+b)
+        print(a-b)
+        print(a*b)
+        print(b*2)
+        print(2*b)
+        A = PyMatrix(a,b,c)
+        print(A)
+        B = PyMatrix(a,b,c, initialize_from_column = False)
+        print(B)
+        print(B[1][2])
+        print(A*B)
+        print(A*a)
+        print(B._minor(0,0))
+        print(B._minor(0,1))
+        print(B._minor(0,2))
+        
+        print(B._minor(0,0).determinant())
+        print(B._minor(0,1).determinant())
+        print(B._minor(0,2).determinant())
+        print(B.determinant())
+        
+        C = B.change_row(1,2)
+        print(C)
+        D = A.multiply_row(0,2)
+        print(D)
+        E = A.add_row(0,1)
+        print(E)
+        print(PyMatrix.identity(3))
+        print(PyMatrix.zero(3))
+        F = PyMatrix(PyVector(1,2,3), PyVector(2,4,6), PyVector(3,6,9), initialize_from_column = False)
+        lst, res = F.gaussian_elimination()
+        print(F)
+        for elem in lst:
+            print(elem)
+            
+        print(res)
+        
+        
+        lst, res = B.gaussian_elimination()
+        print(B)
+        for elem in lst:
+            print(elem)
+        print(res)
+        I4 = PyMatrix.identity(size=4)
+        lst, res = I4.gaussian_elimination()
+        
+        for elem in lst:
+            print(elem)
+        print(res)
+        
+        G = PyMatrix(PyVector(1,2,2,1), 
+                     PyVector(7,4,4,3), 
+                     PyVector(9,5,1,3), 
+                     PyVector(6,2,1,2),)
+        print(G.gaussian_elimination()[1])
+        print(G.diagonalize()[1])
+        print(I4.inverse())
+        print(G.inverse())
+        
+        '''
+        G.inverse should be 
+        
+        -1.375  -0.25   -1.0    4.875
+        0.875   0.25    1.0     -3.375
+        0.25    0.5     0.0     -1.25
+        -1.0    -1.0    -1.0    5.0
+        
+        Did you got it right? :-) 
+        '''
+        

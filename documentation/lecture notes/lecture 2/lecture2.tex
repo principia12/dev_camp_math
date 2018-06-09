@@ -318,7 +318,7 @@ x, *, (,  y, +, z, )&     &  & operand.push(x)     \\ \hline
 (,  y, +, z, )&  x  & * & parse(find\_match(tokens, 0))     \\ \hline
  &  Tree(+, [y,z]) x  & * & operand.push(parse(..))     \\ \hline
  &  Tree(+, [y,z]) x  & * & operator.pop()     \\ \hline
- &  Tree(*, [Tree(+, [y,z]), x]  &  & operator.pop()     \\ \hline
+ &  Tree(*, [Tree(+, [y,z]), x])  &  & operator.pop()     \\ \hline
 \end{tabular}
 \end{table}
 

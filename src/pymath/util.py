@@ -345,7 +345,7 @@ def generator2membership(generator):
     return membership
     
 def isnumber(x):
-    return isinstance(x, (int, long, float, complex))
+    return isinstance(x, (int, float, complex))
     
 escape_dict={'\a':r'\a',
            '\b':r'\b',
