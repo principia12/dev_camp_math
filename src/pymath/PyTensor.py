@@ -348,14 +348,14 @@ class PyMatrix:
         0 1 2 1 0 
         2 1 2 0 0 
         3 3 1 1 1 
-        highest_row : 0 / col_idx = 0
+        highest_row : 0 / col_idx : 0
         >> 1
         
         0 0 0 0 2 
         0 1 0 1 1 
         0 0 1 0 0
         0 0 0 0 1
-        highest_row : 2 / col_idx = 0
+        highest_row : 2 / col_idx : 2
         >> 2
         '''
         for idx, elem in enumerate(self.cols[col_idx][highest_row:]):
