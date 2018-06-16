@@ -335,7 +335,8 @@ if __name__ == '__main__':
             PyVector(4,4,4,4), 
             PyVector(3,3,3,3), ]
         print(PyMatrix(*vecs).rank())
-        print(PyVector.linearly_independent(*vecs))
+        
+      
         
         vecs = [\
             PyVector(1,2,2,1), 
@@ -343,3 +344,7 @@ if __name__ == '__main__':
             PyVector(9,5,1,3), ]
         print(PyMatrix(*vecs).rank())
         print(PyVector.linearly_independent(*vecs))
+        G = PyMatrix(*vecs)
+        Q, R = G.QR()
+        print(Q)
+        print(R)    

@@ -594,6 +594,7 @@ $R = \left[ \begin{matrix}
 
 \begin{itemize} 
 \item rank of a matrix (rank method on PyMatrix)
+\item linear independence of a vector set (linearly\_independent on PyVector)
 \item projection of a vector (proj method on PyVector)
 \item gram-schmidt process (gram\_schmidet method on PyVector)
 \item QR decomposition (QR method on PyMatrix)
@@ -611,6 +612,17 @@ $R = \left[ \begin{matrix}
 \item 위 결과물에서 nonzero row의 갯수를 센 후 반환
 \end{itemize}
 \end{frame}
+
+
+\begin{frame}{실습 : Linearly Independent}
+
+구현 순서는 다음과 같다. 
+\begin{itemize} 
+\item 주어진 벡터들을 row로 가지는 행렬을 생성 
+\item 행렬의 rank와 row의 갯수를 비교. 같으면 True, 틀리면 False 반환. 
+\end{itemize}
+\end{frame}
+
 
 
 \begin{frame}{실습 : Projection}

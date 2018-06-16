@@ -198,6 +198,7 @@ class PySubspace(PySet):
     
 class PyMatrix:
     def __init__(self, *data, initialize_from_column = True):
+        assert data!=(), data
         for elem in data:
             assert isinstance(elem, PyVector)
             assert data[0].size() == elem.size()
@@ -285,7 +286,7 @@ class PyMatrix:
             
             return PyMatrix(*[PyVector(*r) for r in rows], initialize_from_column = False)
         elif isinstance(other, PyVector):
-            pass
+            return self*PyMatrix(*[other])
         elif isnumber(other):
             return PyMatrix(*[other*c for c in self.cols])
             
@@ -317,10 +318,14 @@ class PyMatrix:
         return PyMatrix(*rows, initialize_from_column = False)
         
     def determinant(self):
-        sum = 0
-        for idx, elem in enumerate(self.rows[0]):
-            sum += (-1)**(idx) * self._minor(0, idx).determinant()
-        return sum 
+        assert self.size()[0] == self.size()[1], self.size()
+        if self.size()[0] == 1 and self.size()[1] == 1:
+            return self.data[0][0]
+        else:
+            sum = 0
+            for idx, elem in enumerate(self.rows[0]):
+                sum += (-1)**(idx) * self._minor(0, idx).determinant()
+            return sum 
             
     # some constants
     @staticmethod
@@ -587,7 +592,7 @@ class PyMatrix:
     @staticmethod    
     def solve(A, b):
         assert isinstance(A, PyMatrix)
-        assert isinstance(b, PyVector)
+        assert isinstance(b, PyVector) or isinstance(b, PyMatrix), type(b)
         
         if A.invertible():
             return A.inverse()*b
@@ -597,9 +602,11 @@ class PyMatrix:
     @staticmethod
     def LLS(A, b):
         assert isinstance(A, PyMatrix)
-        assert isinstance(b, PyVector)
-        
-        return PyMatrix.solve(A.psuedo_inverse(self), A.transpose()*b)
+        assert isinstance(b, PyVector) or isinstance(b, PyMatrix), type(b)
+        x, y = A.psuedo_inverse(), A.transpose()*b
+        print(x,y)
+        print(type(A.transpose()), type(b))
+        return PyMatrix.solve(x,y)
     
             
     

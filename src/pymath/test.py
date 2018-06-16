@@ -313,11 +313,38 @@ if __name__ == '__main__':
             PyVector(7,4,4,3), 
             PyVector(9,5,1,3), 
             PyVector(6,2,1,2),]
-        
+        G = PyMatrix(*vecs)
         print(PyVector.linearly_independent(*vecs))
         print(type(G.cols[0]))
         Q, R = G.QR()
         print(Q)
         print(R)
         
-            
+        vecs = [\
+            PyVector(1,2,2,1), 
+            PyVector(7,4,4,3), 
+            PyVector(9,5,1,3), 
+            PyVector(6,2,1,2),
+            PyVector(1,1,1,1),]
+        print(PyMatrix(*vecs).rank())
+        print(PyVector.linearly_independent(*vecs))
+        
+
+        vecs = [\
+            PyVector(1,1,1,1), 
+            PyVector(4,4,4,4), 
+            PyVector(3,3,3,3), ]
+        print(PyMatrix(*vecs).rank())
+        
+      
+        
+        vecs = [\
+            PyVector(1,2,2,1), 
+            PyVector(7,4,4,3), 
+            PyVector(9,5,1,3), ]
+        print(PyMatrix(*vecs).rank())
+        print(PyVector.linearly_independent(*vecs))
+        G = PyMatrix(*vecs)
+        Q, R = G.QR()
+        print(Q)
+        print(R)    

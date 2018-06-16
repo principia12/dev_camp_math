@@ -16,7 +16,7 @@ class PyVector:
         return (len(self.data), 1)
         
     def is_zero(self):
-        return all([e == 0 for e in self.data])
+        pass
     
     def __index__(self, idx):
         return self.data[idx]
@@ -141,16 +141,13 @@ class PyVector:
         '''
         return unit vector that have same direction with self 
         '''
-        return self/self.norm()
+        pass
         
     def proj(self, vec):
         '''
         Projection from self to vec. Thus, resulting vector have directon to vec
         '''
-        
-        assert isinstance(vec, PyVector)
-        
-        return (PyVector.inner_product(self, vec)/vec.norm()**2)*vec
+        pass
         
     
     # span 
@@ -161,13 +158,7 @@ class PyVector:
     # lineraly independent
     @staticmethod
     def linearly_independent(*vecs):
-        for elem in vecs:
-            assert isinstance(elem, PyVector), type(elem)
-        
-        mat = PyMatrix(*vecs, initialize_from_column = False)
-        
-        return mat.rank() == len(vecs)
-        
+        pass
         
     @staticmethod
     def linearly_dependent(*vecs):
@@ -181,14 +172,7 @@ class PyVector:
     
     @staticmethod
     def gram_schmidt(*vecs):
-        assert PyVector.linearly_independent(*vecs)
-        tmp = []
-        for vec in vecs:
-            # u = v_n - sum(proj(v_i, v_n))
-            tmp.append(vec - sum([e.proj(vec) for e in tmp], 
-                            PyVector.zero(vec.size()[0])))
-            
-        return [e*(1/e.norm()) for e in tmp]
+        pass
         
 class PySubspace(PySet):
     def __init__(self, *basis):
@@ -198,6 +182,7 @@ class PySubspace(PySet):
     
 class PyMatrix:
     def __init__(self, *data, initialize_from_column = True):
+        assert data!=(), data
         for elem in data:
             assert isinstance(elem, PyVector)
             assert data[0].size() == elem.size()
@@ -285,7 +270,7 @@ class PyMatrix:
             
             return PyMatrix(*[PyVector(*r) for r in rows], initialize_from_column = False)
         elif isinstance(other, PyVector):
-            pass
+            return self*PyMatrix(*[other])
         elif isnumber(other):
             return PyMatrix(*[other*c for c in self.cols])
             
@@ -317,10 +302,14 @@ class PyMatrix:
         return PyMatrix(*rows, initialize_from_column = False)
         
     def determinant(self):
-        sum = 0
-        for idx, elem in enumerate(self.rows[0]):
-            sum += (-1)**(idx) * self._minor(0, idx).determinant()
-        return sum 
+        assert self.size()[0] == self.size()[1], self.size()
+        if self.size()[0] == 1 and self.size()[1] == 1:
+            return self.data[0][0]
+        else:
+            sum = 0
+            for idx, elem in enumerate(self.rows[0]):
+                sum += (-1)**(idx) * self._minor(0, idx).determinant()
+            return sum 
             
     # some constants
     @staticmethod
@@ -338,13 +327,7 @@ class PyMatrix:
     
     @staticmethod
     def zero(size):
-        rows = []
-        for i in range(size):
-            rows.append([])
-            for j in range(size):
-                rows[-1].append(0)
-        
-        return PyMatrix(*[PyVector(*r) for r in rows], initialize_from_column = False)
+        pass
         
     # elementary operations     
     def change_row(self, i, j):
@@ -558,31 +541,22 @@ class PyMatrix:
         
     # rank of a matrix 
     def rank(self):
-        reduced_form = self.gaussian_elimination()[1]
-        res = 0
-        for row in reduced_form.rows:
-            if not row.is_zero():
-                res += 1
-        return res
+        pass
     
     # QR decomposition
     def QR(self):
-        assert PyVector.linearly_independent(*self.cols)
-        Q = PyMatrix(*PyVector.gram_schmidt(*self.cols))
-        
-        tmp = []
-        for i in range(len(self.cols)):
-            tmp.append([])
-            for j in range(i+1):
-                tmp[-1].append(PyVector.inner_product(Q.cols[j], self.cols[i]))
-            for j in range(i+1, len(self.cols)):
-                tmp[-1].append(0)
-        tmp = [PyVector(*e) for e in tmp]
-        R = PyMatrix(*tmp)
-        return Q, R
+        pass
         
     def psuedo_inverse(self):
         return self.transpose()*self
+    
+    @staticmethod    
+    def solve(A, b):
+        pass
+        
+    @staticmethod
+    def LLS(A, b):
+        pass
     
             
     
