@@ -14,6 +14,9 @@ class PyVector:
         
     def size(self):
         return (len(self.data), 1)
+        
+    def is_zero(self):
+        return all([e == 0 for e in self.data])
     
     def __index__(self, idx):
         return self.data[idx]
@@ -45,6 +48,11 @@ class PyVector:
         '''
         return all(map(lambda x:isnumber(x), self.data))
         
+    # return zero vector
+    @staticmethod
+    def zero(size):
+        return PyVector(*[0 for i in range(size)])
+    
     # implement vector as function 
     def __call__(self, *value_list, **value_dict):
         pass
@@ -75,6 +83,14 @@ class PyVector:
         if isnumber(other):
             return PyVector(*[d*other for d in self.data])
             
+    def __div__(self, other):
+        if isnumber(other):
+            return PyVector(*[d/other for d in self.data])
+        
+    def __rdiv__(self, other):
+        if isnumber(other):
+            return PyVector(*[d/other for d in self.data])
+            
             
     # inner-product related operations
     @staticmethod
@@ -87,7 +103,7 @@ class PyVector:
     def norm(self):
         import math
         if self.is_numeric():
-            return math.sqrt(PyVector.inner_product(self))
+            return math.sqrt(PyVector.inner_product(self, self))
         else:
             '''
             def sqrt_result(*args):
@@ -121,6 +137,22 @@ class PyVector:
         r3 = []
         return PyVector(r1, r2, r3)
    
+    def unit(self):
+        '''
+        return unit vector that have same direction with self 
+        '''
+        return self/self.norm()
+        
+    def proj(self, vec):
+        '''
+        Projection from self to vec. Thus, resulting vector have directon to vec
+        '''
+        
+        assert isinstance(vec, PyVector)
+        
+        return (PyVector.inner_product(self, vec)/vec.norm()**2)*vec
+        
+    
     # span 
     @staticmethod
     def span(*vecs):
@@ -128,18 +160,35 @@ class PyVector:
         
     # lineraly independent
     @staticmethod
-    def lineraly_independent(*vecs):
-        pass
+    def linearly_independent(*vecs):
+        for elem in vecs:
+            assert isinstance(elem, PyVector), type(elem)
+        
+        mat = PyMatrix(*vecs, initialize_from_column = False)
+        
+        return mat.rank() == len(vecs)
+        
         
     @staticmethod
     def linearly_dependent(*vecs):
-        pass
+        return not PyVector.linearly_independent(*vecs)
         
     @staticmethod
     def resolve_dependency(*vecs):
         ''' return one of the biggest subset of vecs that is linearly independent. 
         '''
         pass
+    
+    @staticmethod
+    def gram_schmidt(*vecs):
+        assert PyVector.linearly_independent(*vecs)
+        tmp = []
+        for vec in vecs:
+            # u = v_n - sum(proj(v_i, v_n))
+            tmp.append(vec - sum([e.proj(vec) for e in tmp], 
+                            PyVector.zero(vec.size()[0])))
+            
+        return [e*(1/e.norm()) for e in tmp]
         
 class PySubspace(PySet):
     def __init__(self, *basis):
@@ -506,6 +555,35 @@ class PyMatrix:
             m = elem * m
             
         return m
+        
+    # rank of a matrix 
+    def rank(self):
+        reduced_form = self.gaussian_elimination()[1]
+        res = 0
+        for row in reduced_form.rows:
+            if not row.is_zero():
+                res += 1
+        return res
+    
+    # QR decomposition
+    def QR(self):
+        assert PyVector.linearly_independent(*self.cols)
+        Q = PyMatrix(*PyVector.gram_schmidt(*self.cols))
+        
+        tmp = []
+        for i in range(len(self.cols)):
+            tmp.append([])
+            for j in range(i+1):
+                tmp[-1].append(PyVector.inner_product(Q.cols[j], self.cols[i]))
+            for j in range(i+1, len(self.cols)):
+                tmp[-1].append(0)
+        tmp = [PyVector(*e) for e in tmp]
+        R = PyMatrix(*tmp)
+        return Q, R
+        
+    def psuedo_inverse(self):
+        return self.transpose()*self
+    
             
     
 

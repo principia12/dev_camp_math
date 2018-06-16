@@ -307,3 +307,17 @@ if __name__ == '__main__':
         
         Did you got it right? :-) 
         '''
+        
+        vecs = [\
+            PyVector(1,2,2,1), 
+            PyVector(7,4,4,3), 
+            PyVector(9,5,1,3), 
+            PyVector(6,2,1,2),]
+        
+        print(PyVector.linearly_independent(*vecs))
+        print(type(G.cols[0]))
+        Q, R = G.QR()
+        print(Q)
+        print(R)
+        
+            

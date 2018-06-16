@@ -14,10 +14,13 @@ class PyVector:
         
     def size(self):
         return (len(self.data), 1)
+        
+    def is_zero(self):
+        return all([e == 0 for e in self.data])
     
     def __index__(self, idx):
         return self.data[idx]
-        
+    # for vec[i] syntax    
     def __getitem__(self, idx, j=None):
         if j is None:
             return self.data[idx]
@@ -31,10 +34,6 @@ class PyVector:
             res += ' %s '%str(elem)
         return res
     
-        
-     
-        
-    # for vec[i] syntax
     def __iter__(self):
         yield from self.data
         
@@ -49,6 +48,11 @@ class PyVector:
         '''
         return all(map(lambda x:isnumber(x), self.data))
         
+    # return zero vector
+    @staticmethod
+    def zero(size):
+        return PyVector(*[0 for i in range(size)])
+    
     # implement vector as function 
     def __call__(self, *value_list, **value_dict):
         pass
@@ -78,6 +82,16 @@ class PyVector:
     def __rmul__(self, other):
         if isnumber(other):
             return PyVector(*[d*other for d in self.data])
+            
+    def __div__(self, other):
+        if isnumber(other):
+            return PyVector(*[d/other for d in self.data])
+        
+    def __rdiv__(self, other):
+        if isnumber(other):
+            return PyVector(*[d/other for d in self.data])
+            
+            
     # inner-product related operations
     @staticmethod
     def inner_product(l, r):
@@ -89,7 +103,7 @@ class PyVector:
     def norm(self):
         import math
         if self.is_numeric():
-            return math.sqrt(PyVector.inner_product(self))
+            return math.sqrt(PyVector.inner_product(self, self))
         else:
             '''
             def sqrt_result(*args):
@@ -123,6 +137,22 @@ class PyVector:
         r3 = []
         return PyVector(r1, r2, r3)
    
+    def unit(self):
+        '''
+        return unit vector that have same direction with self 
+        '''
+        return self/self.norm()
+        
+    def proj(self, vec):
+        '''
+        Projection from self to vec. Thus, resulting vector have directon to vec
+        '''
+        
+        assert isinstance(vec, PyVector)
+        
+        return (PyVector.inner_product(self, vec)/vec.norm()**2)*vec
+        
+    
     # span 
     @staticmethod
     def span(*vecs):
@@ -130,12 +160,18 @@ class PyVector:
         
     # lineraly independent
     @staticmethod
-    def lineraly_independent(*vecs):
-        pass
+    def linearly_independent(*vecs):
+        for elem in vecs:
+            assert isinstance(elem, PyVector), type(elem)
+        
+        mat = PyMatrix(*vecs, initialize_from_column = False)
+        
+        return mat.rank() == len(vecs)
+        
         
     @staticmethod
     def linearly_dependent(*vecs):
-        pass
+        return not PyVector.linearly_independent(*vecs)
         
     @staticmethod
     def resolve_dependency(*vecs):
@@ -143,6 +179,16 @@ class PyVector:
         '''
         pass
     
+    @staticmethod
+    def gram_schmidt(*vecs):
+        assert PyVector.linearly_independent(*vecs)
+        tmp = []
+        for vec in vecs:
+            # u = v_n - sum(proj(v_i, v_n))
+            tmp.append(vec - sum([e.proj(vec) for e in tmp], 
+                            PyVector.zero(vec.size()[0])))
+            
+        return [e*(1/e.norm()) for e in tmp]
         
 class PySubspace(PySet):
     def __init__(self, *basis):
@@ -154,30 +200,40 @@ class PyMatrix:
     def __init__(self, *data, initialize_from_column = True):
         for elem in data:
             assert isinstance(elem, PyVector)
-            assert elem.shape == data[0].shape
-        
+            assert data[0].size() == elem.size()
+            
+        '''
+        1 2 3 4 
+        2 3 1 7
+        2 1 4 1
+        -> data : [[1,2,3,4], [2,3,1,7,], [2,1,4,1]]
+        -> rows : [1,2,3,4], [2,3,1,7], [2,1,4,1],
+        -> cols : [1,2,2,], [2,3,1,], [3,1,4,], [4,7,1],
+        '''
         if initialize_from_column:
-            tmp = []
-            for j in range(data[0].shape[0]):
-                tmp.append([])
-                for i in range(len(data)):
-                    tmp[-1].append(data[i][j])
-            self.data = tmp
             self.cols = data
+            tmp = [] 
+            for i in range(data[0].size()[0]):
+                tmp.append([])
+                for j in range(len(data)):
+                    # i : 0~2, j : 0~2
+                    tmp[-1].append(data[j][i]) # [[1,2,3], 
+            self.data = tmp
             self.rows = [PyVector(*r) for r in tmp]
         else:
+            self.rows = data
             tmp = []
             for r in data:
-                tmp.append([e for e in r])
-            self.data = tmp
-                
-            self.rows = data
-            cols = []
-            for idx in range(len(tmp[0])):
-                cols.append(PyVector(*[e[idx] for e in tmp]))
-            self.cols = cols
-            
-        self.is_column = initialize_from_column
+                tmp.append(r.data)
+            self.data = tmp 
+            col = []
+            '''
+            [1,2,3], [4,5,6], [7,8,9]
+            '''
+            for i in range(data[0].size()[0]):
+                col.append(PyVector(*[r[i] for r in data]))
+                # col = [[1,4,7], [2,5,8],...]
+            self.cols = col 
         
     def __str__(self):
         res = ''
@@ -186,6 +242,7 @@ class PyMatrix:
                 res += '%s\t'%str(round(elem, 3))
             res += '\n'
         return res
+    
     def size(self):
         return (len(self.data), len(self.data[0]))
         
@@ -198,131 +255,143 @@ class PyMatrix:
     # matrix arithematic operations     
     def __add__(self, other):
         assert isinstance(other, self.__class__)
+        assert isinstance(other, PyMatrix)
         assert self.size() == other.size()
         
-        cols = [x+y for x,y in zip(self.cols, other.cols)]
-        return PyMatrix(cols)
-        
+        return PyMatrix(*[x+y for x,y in zip(self.cols, other.cols)])
         
     def __sub__(self, other):
         assert isinstance(other, self.__class__)
+        assert isinstance(other, PyMatrix)
         assert self.size() == other.size()
         
-        cols = [x-y for x,y in zip(self.cols, other.cols)]
-        return PyMatrix(cols)
-        
+        return PyMatrix(*[x-y for x,y in zip(self.cols, other.cols)])
+    
+    
     def __mul__(self, other):
         # matrix-matrix
         if isinstance(other, self.__class__):
             assert self.size()[1] == other.size()[0]
-            tmp = []
-            for i in range(self.size()[0]):
-                tmp.append([])
-                for j in range(other.size()[1]):
+            rows = []
+            # a_ik b_kj 
+            
+            for i in range(self.size()[0]): # i 
+                rows.append([])
+                for j in range(other.size()[1]): # j 
                     sum = 0
                     for k in range(self.size()[1]):
-                        sum += self.data[i][k]*other.data[k][j]
-                    tmp[-1].append(sum)
-            return PyMatrix(*[PyVector(*r) for r in tmp], 
-                                initialize_from_column = False)
+                        sum += self.data[i][k] * other.data[k][j]
+                    rows[-1].append(sum)
+            
+            return PyMatrix(*[PyVector(*r) for r in rows], initialize_from_column = False)
         elif isinstance(other, PyVector):
-            assert self.size()[1] == other.size()[0]
-            tmp = []
-            for i in range(self.size()[0]):
-                tmp.append([])
-                for j in range(other.size()[1]):
-                    sum = 0
-                    for k in range(self.size()[1]):
-                        sum += self.data[i][k]*other.data[k]
-                    tmp[-1].append(sum)
-            return PyMatrix(*[PyVector(*r) for r in tmp])
-    
+            pass
+        elif isnumber(other):
+            return PyMatrix(*[other*c for c in self.cols])
+            
+            
     def __rmul__(self, other):
         if isnumber(other):
-            return PyMatrix(*[other*r for r in self.cols])
+            return PyMatrix(*[other*c for c in self.cols])
+        
     # trace and transpose    
     def trace(self):
         sum = 0
-        assert self.size()[0] == self.size()[1]
-        for i in range(self.size()[0]):
+        for i in range(min(self.size())):
             sum += self.data[i][i]
         return sum 
         
     def transpose(self):
         return PyMatrix(*self.rows)
     
-    @staticmethod
-    def _remove_idx(lst, remove_idx):   
-        tmp = []
-        for idx, elem in enumerate(lst):
-            if idx != remove_idx:
-                tmp.append(elem)
-        return tmp 
     def _minor(self, i, j):
-        cols = []
-        for idx, c in enumerate(self.cols):
+        # ith row, jth col
+        rows = []
+        for idx, elem in enumerate(self.rows):
             if idx != i:
-                cols.append(\
-                    PyVector(*PyMatrix._remove_idx(c.data, j)))
-        return PyMatrix(*cols)
-            
+                tmp = []
+                for jdx, c in enumerate(elem.data):
+                    if jdx != j:
+                        tmp.append(c)
+                rows.append(PyVector(*tmp))
+        return PyMatrix(*rows, initialize_from_column = False)
         
     def determinant(self):
-        assert self.size()[0] == self.size()[1]
-        if self.size() == (2,2):
-            return self.data[0][0]*self.data[1][1] - self.data[1][0]*self.data[0][1]
-        else:
-            sum = 0
-            for idx, elem in enumerate(self.rows[0]):
-                sum += (-1)**idx * self._minor(0,idx).determinant()
-            return sum 
+        sum = 0
+        for idx, elem in enumerate(self.rows[0]):
+            sum += (-1)**(idx) * self._minor(0, idx).determinant()
+        return sum 
             
     # some constants
     @staticmethod
     def identity(size):
-        cols = [[0]*i + [1] + [0]*(size-i-1) for i in range(size)]
-        return PyMatrix(*[PyVector(*c) for c in cols])
+        rows = []
+        for i in range(size):
+            rows.append([])
+            for j in range(size):
+                if i==j:
+                    rows[-1].append(1)
+                else:
+                    rows[-1].append(0)
+        
+        return PyMatrix(*[PyVector(*r) for r in rows], initialize_from_column = False)
     
     @staticmethod
     def zero(size):
-        cols = [[0]*size for i in range(size)]
-        return PyMatrix(*[PyVector(*c) for c in cols])
+        rows = []
+        for i in range(size):
+            rows.append([])
+            for j in range(size):
+                rows[-1].append(0)
+        
+        return PyMatrix(*[PyVector(*r) for r in rows], initialize_from_column = False)
         
     # elementary operations     
     def change_row(self, i, j):
-        rows = []
-        for idx, elem in enumerate(self.rows): 
+        row = []
+        for idx, elem in enumerate(self.rows):
             if idx == i:
-                rows.append(self.rows[j])
+                row.append(self.rows[j])
             elif idx == j:
-                rows.append(self.rows[i])
+                row.append(self.rows[i])
             else:
-                rows.append(self.rows[idx])
-        return PyMatrix(*rows, initialize_from_column = False)
-        
+                row.append(elem)
+                
+        return PyMatrix(*row, initialize_from_column = False)
+    
     def multiply_row(self, i, factor):
-        rows = []
-        for idx, elem in enumerate(self.rows): 
+        assert isnumber(factor)
+        row = []
+        for idx, elem in enumerate(self.rows):
             if idx == i:
-                rows.append(factor*self.rows[i])
+                row.append(factor * self.rows[i])
             else:
-                rows.append(self.rows[idx])
-        return PyMatrix(*rows, initialize_from_column = False)
-        
+                row.append(elem)
+                
+        return PyMatrix(*row, initialize_from_column = False)
+    
     def add_row(self, i, j):
-        rows = []
-        for idx, elem in enumerate(self.rows): 
+        # ith row -> ith row + jth row
+        row = []
+        for idx, elem in enumerate(self.rows):
             if idx == i:
-                rows.append(self.rows[i] + self.rows[j])
+                row.append(self.rows[i] + self.rows[j])
             else:
-                rows.append(self.rows[idx])
-        
-        return PyMatrix(*rows, initialize_from_column = False)
+                row.append(elem)
+                
+        return PyMatrix(*row, initialize_from_column = False)
     
     @staticmethod
     def elementary_matrix(**kargs):
         assert 'option' in kargs.keys()
         assert 'size' in kargs.keys()
+        '''
+        kargs = {'option' : ..., 
+                 'size' : ..., 
+                 'i' : ...,
+                 'j' : .., 
+                 'factor' : ...,
+        '''
         
         if kargs['option'] == 'add':
             assert 'i' in kargs.keys()
@@ -348,22 +417,22 @@ class PyMatrix:
         0 1 2 1 0 
         2 1 2 0 0 
         3 3 1 1 1 
-        highest_row : 0 / col_idx : 0
+        highest_row : 0 / col_idx = 0
         >> 1
         
         0 0 0 0 2 
         0 1 0 1 1 
         0 0 1 0 0
         0 0 0 0 1
-        highest_row : 2 / col_idx : 2
+        highest_row : 2 / col_idx = 2
         >> 2
         '''
-        for idx, elem in enumerate(self.cols[col_idx][highest_row:]):
-            if elem == 0:
-                pass
-            else:
+        
+        for idx, elem in enumerate(self.cols[col_idx].data[highest_row:]):
+            if elem != 0:
                 return idx + highest_row
                 
+    
     def gaussian_elimination(self):
         '''Return list of elementary operations and result matrix. 
         - list of matrices corresponding with necessary elementary operaitons
@@ -371,109 +440,155 @@ class PyMatrix:
        
         '''
         from copy import deepcopy
-        
-        col_idx = 0 
-        
+
         tmp = deepcopy(self)
+        col_idx = 0 
         lst = []
-        s = len(tmp.rows)
+        s = self.size()[0]
         
-        while(col_idx != self.size()[1]):
-            idx = tmp._find_leading_row(col_idx, col_idx)
-            if idx is None:
+        while col_idx != self.size()[1]:
+            
+            row_idx = tmp._find_leading_row(col_idx, col_idx)
+            if row_idx is None:
                 col_idx += 1
                 continue
-            assert idx >= col_idx, (idx, col_idx)
-            if idx != col_idx:
-                m = PyMatrix.elementary_matrix(option = 'chanage', 
-                                      i = col_idx,
-                                      j = idx,
-                                      size = s)
-                lst.append(m)
-                
+            elif row_idx != col_idx:
+                # change col_idx th row and row_idx th row 
+                '''
+                0 1 1 
+                2 1 0
+                2 2 2 
+                row_idx = 1 
+                col_idx = 0
+                '''
+                m = PyMatrix.elementary_matrix(\
+                option = 'change', 
+                i = col_idx, 
+                j = row_idx,
+                size = s)
                 tmp = m * tmp
-            leading_elem = tmp.data[col_idx][col_idx]
-            # make all column elements below col_idx 0 
-            for idx, elem in enumerate(tmp.cols[col_idx]):
-                if idx > col_idx and elem != 0:
-                    m = PyMatrix.elementary_matrix(option = 'multiply', 
-                                          i = idx, 
-                                          factor = -leading_elem/elem, 
-                                          size = s)
+                lst.append(m)
+            '''
+            2 1 0 
+            0 1 1 
+            2 2 2 
+            '''
+            t_elem = tmp.data[col_idx][col_idx]
+            
+            
+            for idx, elem in enumerate(tmp.cols[col_idx].data[col_idx+1:]):
+                
+                if elem != 0:
+                    # elem -> -t_elem/elem 
+                    m = PyMatrix.elementary_matrix(\
+                    option = 'multiply', 
+                    i = col_idx+idx+1,
+                    factor = -t_elem/elem,
+                    size = s)
                     lst.append(m)
-                    tmp = m * tmp
-                    m = PyMatrix.elementary_matrix(option = 'add', 
-                                          i = idx, 
-                                          j = col_idx,
-                                          size = s,)
+                    tmp = m * tmp 
+                    '''
+                    2 1 0 
+                    0 1 1 
+                    -2 -2 -2 ( -1* (2 2 2))
+                    '''
+                    # sum col_idx th row col_idx + idx th row 
+                    m = PyMatrix.elementary_matrix(\
+                    option = 'add', 
+                    i = col_idx + idx + 1, 
+                    j = col_idx, 
+                    size = s)
                     lst.append(m)
                     tmp = m * tmp
             col_idx += 1
-            
-        return lst, tmp 
+        
                 
-                
-            
+        return lst, tmp
+        
     def diagonalize(self):
-        assert self.size()[0] == self.size()[1]
-        assert self.invertible()
-        
+        col_idx = 0
         lst, tmp = self.gaussian_elimination()
-        s = len(tmp.rows)
-        
-        for col_idx in range(s): 
-            for row_idx in range(col_idx):
-                i = col_idx
-                j = row_idx 
-                
-                if tmp.data[j][i] != 0:
-                    m = PyMatrix.elementary_matrix(option = 'multiply', 
-                                    i = j, 
-                                    factor = -tmp.data[i][i]/tmp.data[j][i], 
-                                    size = s)
+        s = self.size()[0]
+        while col_idx != self.size()[1]:   
+            t_elem = tmp.data[col_idx][col_idx]
+            for idx, elem in enumerate(tmp.cols[col_idx].data[:col_idx]):
+                if elem != 0:
+                    # elem -> -t_elem/elem 
+                    m = PyMatrix.elementary_matrix(\
+                        option = 'multiply', 
+                        i = idx,
+                        factor = -t_elem/elem,
+                        size = s)
                     lst.append(m)
                     tmp = m * tmp 
-                    m = PyMatrix.elementary_matrix(option = 'add', 
-                                                i = j, 
-                                                j = i, 
-                                                size = s)
+                    
+                    # sum col_idx th row col_idx + idx th row 
+                    m = PyMatrix.elementary_matrix(\
+                        option = 'add', 
+                        i = idx, 
+                        j = col_idx, 
+                        size = s)
                     lst.append(m)
                     tmp = m * tmp
+            col_idx += 1
         return lst, tmp
         
     # check if there is a inverse    
     def invertible(self):
-        assert self.size()[0] == self.size()[1]
-        res = True
-        lst, tmp = self.gaussian_elimination()
-        for idx in range(self.size()[1]):
-            res = res and tmp.data[idx][idx] != 0
-            
-        return res
-        # lst, tmp = self.gaussian_elimination()
-        # return all([tmp.data[i][i] for i in range(self.size()[0])])
+        return self.determinant() != 0
         
     # get inverse if it exists. else return None 
     def inverse(self):
-        assert self.size()[0] == self.size()[1]
-        assert self.invertible()
-        
+        s = self.size()[0]
         lst, tmp = self.diagonalize()
-        s = len(tmp.cols)
-        for idx in range(s):
-            m = PyMatrix.elementary_matrix(option = 'multiply', 
-                                    i = idx, 
-                                    factor = 1/tmp.data[idx][idx], 
-                                    size = s)
+        for i in range(tmp.size()[0]):
+            m = PyMatrix.elementary_matrix(\
+                option = 'multiply', 
+                i = i, 
+                factor = 1/tmp.data[i][i],
+                size = s,)
             lst.append(m)
-            tmp = m * tmp 
-        print(tmp)
-            
         
-        res = PyMatrix.identity(s)
+        m = PyMatrix.identity(s)
+        
         for elem in lst:
-            res = elem * res
+            m = elem * m
             
+        return m
+        
+    # rank of a matrix 
+    def rank(self):
+        reduced_form = self.gaussian_elimination()[1]
+        res = 0
+        for row in reduced_form.rows:
+            if not row.is_zero():
+                res += 1
         return res
     
+    # QR decomposition
+    def QR(self):
+        assert PyVector.linearly_independent(*self.cols)
+        Q = PyMatrix(*PyVector.gram_schmidt(*self.cols))
+        
+        tmp = []
+        for i in range(len(self.cols)):
+            tmp.append([])
+            for j in range(i+1):
+                tmp[-1].append(PyVector.inner_product(Q.cols[j], self.cols[i]))
+            for j in range(i+1, len(self.cols)):
+                tmp[-1].append(0)
+        tmp = [PyVector(*e) for e in tmp]
+        R = PyMatrix(*tmp)
+        return Q, R
+        
+    def psuedo_inverse(self):
+        return self.transpose()*self
     
+    @staticmethod    
+    def sovle(formula):
+        assert isinstance(formula, PyFormula)
+        
+    
+            
+    
+

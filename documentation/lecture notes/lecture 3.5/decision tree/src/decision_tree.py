@@ -183,6 +183,9 @@ if __name__ == '__main__':
     train, test = divide_dataset(dataset, ratio = (0.8, 0.2))
     
     tree = train_tree(train)
+    print(tree)
+    for node in tree.nodes():
+        print(node)
     
     precision = evaluate_tree(tree, test)
     print(precision)
