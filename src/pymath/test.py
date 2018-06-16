@@ -9,17 +9,15 @@ from PyTensor import *
 
 if __name__ == '__main__':
     default = False
-    quiet = False
     if len(sys.argv) == 1:
         default = True
-        quiet = True
     elif len(sys.argv) >= 3:
         quiet = sys.argv[2] == 'q'
     else:
         quiet = False
     noisy = not quiet
     
-    if sys.argv[1] == 'set':
+    if default or sys.argv[1] == 'set':
         print('Testing PySet Module')
         print('---------------------')
         if noisy:
@@ -101,11 +99,6 @@ if __name__ == '__main__':
                 i = 1/(2*floor(i)-i+1)
 
         PyRational = PyCountableSet(rational_generator)
-        print('---------------------')
-        if noisy:
-            print('Testing PyCountableSet.list_elements')    
-        PyInt.list_elements()
-        PyRational.list_elements()
         print('---------------------')
         if noisy:
             print('Testing PyFiniteSet')
@@ -207,6 +200,7 @@ if __name__ == '__main__':
         a = PyVector(1,2,3)
         b = PyVector(4,5,6)
         c = PyVector(7,8,9)
+        '''
         print(a)
         print(b)
         print(a+b)
@@ -214,12 +208,33 @@ if __name__ == '__main__':
         print(a*b)
         print(b*2)
         print(2*b)
+        
         A = PyMatrix(a,b,c)
+        print(A.data)
+        
+        
         print(A)
         B = PyMatrix(a,b,c, initialize_from_column = False)
         print(B)
+        
+        A1 = PyVector(1,2,3,4)
+        A2 = PyVector(1,2,3,4)
+        A3 = PyVector(1,2,3,4)
+        B1 = PyMatrix(A1, A2, A3)
+        print(B1.size())
+        print(B1)
+        
         print(B[1][2])
+        print(type(A))
+        print(type(B))
+        print(A+B)
+        print(A)
+        print(B)
+        
+        # print(A+B1)
+        
         print(A*B)
+        
         print(A*a)
         print(B._minor(0,0))
         print(B._minor(0,1))
@@ -231,14 +246,27 @@ if __name__ == '__main__':
         print(B.determinant())
         
         C = B.change_row(1,2)
+        print(B)
         print(C)
+        
         D = A.multiply_row(0,2)
+        print(A)
         print(D)
         E = A.add_row(0,1)
+        print(A)
         print(E)
+        
         print(PyMatrix.identity(3))
         print(PyMatrix.zero(3))
+        '''
+        '''
+        1 2 3 
+        2 4 6 
+        3 6 9 
+        
+        
         F = PyMatrix(PyVector(1,2,3), PyVector(2,4,6), PyVector(3,6,9), initialize_from_column = False)
+        
         lst, res = F.gaussian_elimination()
         print(F)
         for elem in lst:
@@ -252,6 +280,7 @@ if __name__ == '__main__':
         for elem in lst:
             print(elem)
         print(res)
+        '''
         I4 = PyMatrix.identity(size=4)
         lst, res = I4.gaussian_elimination()
         
@@ -279,3 +308,16 @@ if __name__ == '__main__':
         Did you got it right? :-) 
         '''
         
+        vecs = [\
+            PyVector(1,2,2,1), 
+            PyVector(7,4,4,3), 
+            PyVector(9,5,1,3), 
+            PyVector(6,2,1,2),]
+        
+        print(PyVector.linearly_independent(*vecs))
+        print(type(G.cols[0]))
+        Q, R = G.QR()
+        print(Q)
+        print(R)
+        
+            

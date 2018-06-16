@@ -85,6 +85,7 @@ class Tree:
                 children[idx] = Tree(child)
         
         self.children = children
+    
     def __eq__(self, other):
         if isinstance(other, self.__class__):
             if self.datum == other.datum:
@@ -98,7 +99,7 @@ class Tree:
         x = self.__eq__(other)
         if x is not NotImplemented:
             return not x
-        return NotImplemente
+        return NotImplemented
     
     def __str__(self):
         res = str(self.datum)
