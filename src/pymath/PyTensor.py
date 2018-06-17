@@ -185,8 +185,9 @@ class PyVector:
         tmp = []
         for vec in vecs:
             # u = v_n - sum(proj(v_i, v_n))
-            tmp.append(vec - sum([e.proj(vec) for e in tmp], 
-                            PyVector.zero(vec.size()[0])))
+            tmp.append(vec - \
+            sum([e.proj(vec) for e in tmp],\
+                 PyVector.zero(vec.size()[0])))
             
         return [e*(1/e.norm()) for e in tmp]
         
@@ -604,8 +605,7 @@ class PyMatrix:
         assert isinstance(A, PyMatrix)
         assert isinstance(b, PyVector) or isinstance(b, PyMatrix), type(b)
         x, y = A.psuedo_inverse(), A.transpose()*b
-        print(x,y)
-        print(type(A.transpose()), type(b))
+        
         return PyMatrix.solve(x,y)
     
             

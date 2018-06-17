@@ -16,7 +16,17 @@ class PyVector:
         return (len(self.data), 1)
         
     def is_zero(self):
-        pass
+        '''
+        res = True
+        for i in self.data:
+            if i==0:
+                res = res and True
+            else:
+                return False
+        
+        return res 
+        '''
+        return all([e==0 for e in self.data])
     
     def __index__(self, idx):
         return self.data[idx]
@@ -147,7 +157,9 @@ class PyVector:
         '''
         Projection from self to vec. Thus, resulting vector have directon to vec
         '''
-        pass
+        PyVector.inner_product()
+        return \
+        (PyVector.inner_product(self, vec)/self.norm()**2) * vec
         
     
     # span 
@@ -158,7 +170,10 @@ class PyVector:
     # lineraly independent
     @staticmethod
     def linearly_independent(*vecs):
-        pass
+        mat = PyMatrix(*vecs, \
+                initialize_from_column = False)
+        return mat.rank() == len(mat.rows)
+        
         
     @staticmethod
     def linearly_dependent(*vecs):
@@ -172,7 +187,17 @@ class PyVector:
     
     @staticmethod
     def gram_schmidt(*vecs):
-        pass
+        assert PyVector.linearly_independent(*vecs)
+        res = []
+        n = len(vecs)
+        for i in range(n):
+            s = PyVector(*[0 for i in range(len(vecs[0].data))])
+            for j in range(i):
+                s = s + vecs[j].proj(vecs[i])
+            res.append(vecs[i]-s)
+        res = [r*(1/r.norm()) for r in res]
+        
+        return res
         
 class PySubspace(PySet):
     def __init__(self, *basis):
@@ -541,7 +566,12 @@ class PyMatrix:
         
     # rank of a matrix 
     def rank(self):
-        pass
+        lst, tmp = self.gaussian_elimination()
+        cnt = 0
+        for row in tmp.rows:
+            if not row.is_zero():
+                cnt += 1
+        return cnt
     
     # QR decomposition
     def QR(self):
