@@ -24,11 +24,14 @@ class PyFormula:
             self.tree = tree
             var_list = [x.datum[1] for x in tree.leaves() \
                             if x.datum[0] == 'var']
+            var_list = list(set(var_list))                
             self.variables = PyFiniteSet(*var_list)
         elif isinstance(eq, Tree):
             self.tree = eq
             self.eq = PyFormula._tree2str(eq)
-            var_list = [x[1] for x in eq.nodes() if x[0] == 'var']
+            var_list = [x.datum[1] for x in eq.nodes() \
+                            if x.datum[0] == 'var']
+            var_list = list(set(var_list))
             self.variables = PyFiniteSet(*var_list)
         else:
             print('Input should be either tree or a string.')
@@ -106,7 +109,10 @@ class PyFormula:
                 if tree.datum[1] == '*':
                     for child in tree.children:
                         if child.children == []:
-                            res += str(child.datum[1])
+                            if child.datum[1] == '1':
+                                pass
+                            else:
+                                res += str(child.datum[1])
                         elif child.datum[0] == 'func':
                             res += '%s'%PyFormula._tree2str(child)
                         else:
@@ -140,6 +146,14 @@ class PyFormula:
                 res = str(tree.datum[1])
         elif tree.datum[0] in ['num', 'var']:
             res = str(tree.datum[1])
+        elif tree.datum[0] in ['func']:
+            res = tree.datum[1] 
+            res += '('
+            for child in tree.children:
+                res += PyFormula._tree2str(child)
+                res += ','
+            res = res[:-1]
+            res += ')' 
             
         return res    
 
@@ -198,6 +212,24 @@ def tokenizer(equation):
                             yield ('unary', 'unary %s'%left[0])
                     left = left[1:]        
                     num_flag = False
+    
+def compress_tok(tokenizer):
+    delay_flag = False 
+    buf = []
+    # for tok_type, tok in tokenizer:
+        # if not delay_flag:
+            # delay_flag = tok_type
+            # buf.append(tok)
+                
+        # if tok_type == delay_flag:
+            # buf.append(tok)
+                
+            
+        # else:
+            
+            # tok_type = delay_flag
+            # tok = 
+            # yield (tok_type, buf[0])
     
 def recursive_descent(tokens):
     
