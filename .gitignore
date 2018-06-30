@@ -29,4 +29,10 @@ tmp*.py
 # too many images 
 **/lecture\ 2/img/*.png
 **/lecture\ 2/img/**/*.png
+**/CDMA/img/*.png
+**/CDMA/img/**/*.png
+
+# practice files 
+practice
+practices
 

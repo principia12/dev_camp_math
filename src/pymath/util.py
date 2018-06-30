@@ -82,7 +82,8 @@ class Tree:
             if isinstance(child, Tree):
                 children[idx] = child
             else:
-                children[idx] = Tree(child)
+                assert False, 'tree' 
+                #children[idx] = Tree(child)
         
         self.children = children
     
@@ -180,6 +181,24 @@ class Tree:
             sub.children = [elem]
         else:
             sub.children.append(elem) # why does error occur when leaf? 
+            
+    def replace_subtree(self, src, dest):
+        # replace src with dest by making a new tree
+        if self == src:
+            return dest
+        else:
+            tmp = []
+            for child in self.children:
+                p = child.path_to_subtree(src)
+                if p != -1:
+                    tmp.append(child.replace_subtree(src, dest))
+                else:
+                    tmp.append(child)
+            return Tree(datum = self.datum, children = tmp)
+       
+                
+                
+        
         
     def copy(self):
         from copy import deepcopy 

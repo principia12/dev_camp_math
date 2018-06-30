@@ -3,6 +3,7 @@ import sys
 import math 
 from util import binary2nary
 
+
 MAXIMUM_ITERATION = 10000
 DEBUG = False
 
@@ -24,17 +25,19 @@ OPERATION_WITH_FUNCTIONS = {\
 
 PARA = ['(', ')', '[', ']', '{', '}',]
 
-FUNCTION_DICT = {\
-    'cos' : math.cos, 
-    'sin' : math.sin, 
-    'tan' : math.tan, 
-    'cosh' : math.cosh,
-    'sinh' : math.sinh,
-    'tanh' : math.tanh,    
-    'ln' : math.log,
-    'log' : math.log10,
     
+FUNCTION_DICT = {\
+    'cos' : (math.cos, math.sin, 
+                      'sin(placeholder)'),
+    'sin' : (math.sin, lambda x:-math.cos(x), 
+                       '-1*cos(placeholder)',),
+    'tan' : (math.tan, lambda x:1/(math.cos(x)**2), 
+                       '1/cos(placeholder)^2'),
+    'ln' : (math.log, lambda x:1/x, 
+                      '1/placeholder'),
     # constants are also considered as functions! 
-    'e' : lambda : math.e, 
-    'pi' : lambda : math.pi, 
+    'e' : (lambda : math.e, lambda : 0, '0'),
+    'pi' : (lambda : math.pi, lambda : 0, '0'),
+    
+    # custom functions 
     }

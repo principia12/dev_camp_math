@@ -7,6 +7,8 @@ from copy import deepcopy
 import math
 import re
 
+
+
 #-------------------------------------              
 # Formula Class
 #-------------------------------------
@@ -55,7 +57,13 @@ class PyFormula:
     def terms(self):
         if self.tree.datum[1] == '+':
             return self.tree.children
-        return self        
+        return self   
+
+    def substitute(self, var, val):
+        # find var token and replace to val Tree or PyFormula
+        tree = self.tree
+        return PyFormula(tree.replace_subtree(Tree(datum = var), val))
+        
     
     def _expand(self):
         pass
@@ -101,6 +109,7 @@ class PyFormula:
     
     @staticmethod
     def _tree2str(tree):
+        assert isinstance(tree, Tree)
         res = ''
         #if tree.children == []:
         #    return str(tree.datum[1])
@@ -135,6 +144,7 @@ class PyFormula:
                                 
                     res = '%s/%s'%(denom, numer)
                 else:
+                    
                     for idx, child in enumerate(tree.children):
                         if child.children == []:
                             res += str(child.datum[1])
@@ -167,15 +177,20 @@ precedence = {\
     'unary -' : 4}
     
 def tokenizer(equation):
-    left = equation 
+    left = equation.replace(' ', '')
     tokens = {\
         'op' : ['^', '+', '-', '*', '+', '/'],
         'unary' :  ['-'],
         'para' : ['(', ')'],
         'num' : [r"[1-9][0-9]*\.?[0-9]*|0",],
-        'var' : [r"[a-zA-Z]+_?[0-9]*",], }
-    tok_strings = tokens['op'] + tokens['unary'] + \
-        tokens['para'] + tokens['num'] + tokens['var']
+        'var' : [r"[a-zA-Z]+_?[0-9]*",], 
+        'comma' : [',']}
+    
+    #tok_strings = tokens['op'] + tokens['unary'] + \
+    #    tokens['para'] + tokens['num'] + tokens['var'] 
+    tok_strings = []
+    for k in tokens.keys():
+        tok_strings.extend(tokens[k])
     num_flag = False
     def find_key_from_elem(d, e):
         res = []
@@ -192,6 +207,11 @@ def tokenizer(equation):
                     yield (('num', left[m.start():m.end()]))
                     left = left[m.end():]
                     num_flag = True
+            elif tok in tokens['comma']:
+                if re.match(tok, left) is not None:
+                    m = re.match(tok, left)
+                    yield (('comma', left[m.start():m.end()]))
+                    left = left[m.end():]
             elif tok in tokens['var']:
                 if re.match(tok, left) is not None:
                     m = re.match(tok, left)
@@ -212,24 +232,15 @@ def tokenizer(equation):
                             yield ('unary', 'unary %s'%left[0])
                     left = left[1:]        
                     num_flag = False
+                    
     
 def compress_tok(tokenizer):
-    delay_flag = False 
-    buf = []
-    # for tok_type, tok in tokenizer:
-        # if not delay_flag:
-            # delay_flag = tok_type
-            # buf.append(tok)
-                
-        # if tok_type == delay_flag:
-            # buf.append(tok)
-                
+    for tok_type, tok in tokenizer:
+        if tok_type == 'var' and tok in FUNCTION_DICT.keys():
+                yield ('func', tok)
+        else:
+            yield (tok_type, tok)
             
-        # else:
-            
-            # tok_type = delay_flag
-            # tok = 
-            # yield (tok_type, buf[0])
     
 def recursive_descent(tokens):
     
@@ -241,7 +252,7 @@ def recursive_descent(tokens):
     return res
     
 def expr(operator, operand, tokens, idx):
-    
+    # expr := part (binary part)*
     idx = part(operator, operand, tokens, idx)
     idx += 1
     if idx != len(tokens):        
@@ -284,20 +295,46 @@ def find_match(tokens, t_idx):
     return len(tokens)+1
     
 def part(operator, operand, tokens, idx):
+    # part := num | var 
+    #      := "(" expr ")"
+    #      := func "(" (expr ,)* expr ")"
+    #      := unary part 
+    
     next_tok = tokens[idx]
     
     if next_tok[0] == 'num' or next_tok[0] == 'var':
+        # part := num | var
         operand.push(Tree(datum=next_tok))
     elif next_tok[1] == '(':
+        # part := "(" expr ")"
         tokens_in_para = tokens[idx+1:find_match(tokens, idx)]
         e = recursive_descent(tokens_in_para)
         idx = find_match(tokens, idx) 
         operand.push(e)
         tokens = tokens[idx:]
     elif next_tok[0] == 'unary':
+        # part := unary part
         push_operator(operator, operand, next_tok)
         idx += 1
         idx = part(operator, operand, tokens,  idx)
+    elif next_tok[0] == 'func':
+        # part := func "(" (expr ,)* expr ")"
+        
+        idx += 1
+        tokens_in_para = tokens[idx+1:find_match(tokens, idx)]
+        args = [[]]
+        
+        for tok_type, tok in tokens_in_para:
+            if tok_type == 'comma':
+                args.append([])
+            else:
+                args[-1].append((tok_type, tok))
+        
+        args = [recursive_descent(arg) for arg in args]
+        idx = find_match(tokens, idx)
+        
+        operand.push(Tree(datum=next_tok, children = args))
+        
     else:
         assert False, 'Something wrong at %s'%str(tokens[idx])
     return idx
@@ -333,7 +370,9 @@ def push_operator(operator, operand, op):
     operator.push(op)
     
 def parse(eq):
-    return recursive_descent(list(tokenizer(eq)))
+    return recursive_descent(list(compress_tok(tokenizer(eq))))
+
+    
         
 if __name__ == '__main__':
     
@@ -390,7 +429,14 @@ if __name__ == '__main__':
     eq45 = 'a+b+C+d+e+f+g+h'
     eq46 = '1'
     eq47 = '0'
-
+    
+    eq48 = 'sin(x+y)'
+    for t, tok in compress_tok(tokenizer(eq48)):
+        print(t, tok)
+       
+    print(parse(eq48))
+    
+    '''
     for i in range(100):
         try:
             eq = eval('eq%d'%i)
@@ -398,11 +444,14 @@ if __name__ == '__main__':
             continue
         print('=============')
         print(eq)
-        print(parse(eq))
+        for t, tok in compress_tok(tokenizer(eq)):
+            print(t, tok)
+        #print(parse(eq))
         print('=============')
     eq = PyFormula(eq37)
     print(eq(1,2,3))
     print(eq(x_0 = 1, y = 2, z = 3)) 
+    '''
     
     
     

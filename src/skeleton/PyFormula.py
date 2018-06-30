@@ -212,6 +212,7 @@ def tokenizer(equation):
         'op' : ['^', '+', '-', '*', '+', '/'],
         'para' : ['(', ')'],
         'num' : [r"[1-9][0-9]*\.?[0-9]*|0",],
+
         'var' : [r"[a-zA-Z]+_?[0-9]*",], }
     tok_strings = tokens['op'] + \
         tokens['para'] + tokens['num'] + tokens['var']

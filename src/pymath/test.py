@@ -348,3 +348,5 @@ if __name__ == '__main__':
         Q, R = G.QR()
         print(Q)
         print(R)    
+        
+    
