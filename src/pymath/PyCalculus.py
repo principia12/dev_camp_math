@@ -12,6 +12,8 @@ def differentiate(formula,
                   constant_variables = ['n'],
                   is_partial = False, 
                   is_symbolic = True, 
+                  point = 0, 
+                  delta = 0.001,
                   debug = False):
     if not isinstance(formula, PyFormula):
         #assert False, 'Should be PyFormula, now %s'%(str(formula)  + str(type(formula)))
@@ -113,7 +115,7 @@ def differentiate(formula,
             if is_partial:
                 return PyFormula(diff_formula).substitute(\
                         ('var', 'placeholder'), 
-                        Tree(datum = ('var', variable)))
+                        cur_tree.children[0])
             else:
                 # (f(g(x)))' = f'(g(x)) g'(x)
                 # (f(g(x,y)))' = f'(g(x,y))g'(x,y)
@@ -128,7 +130,6 @@ def differentiate(formula,
                     res = Tree(('op', '*'), \
                             [df.tree, darg.tree])
                 else:
-                
                     for arg in formula.variables.elements:
                         df = differentiate(formula, 
                                     variable = arg, 
@@ -164,6 +165,10 @@ def differentiate(formula,
                         res = Tree(datum = datum)
         
         return PyFormula(res)
+    elif is_symbolic == False:
+        src = {variable : point}
+        dest = {variable : point + delta}
+        return (formula(**dest) - formula(**src))/delta
         
         
 def diff(target, variable):

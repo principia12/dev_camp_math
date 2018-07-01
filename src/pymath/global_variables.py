@@ -28,9 +28,9 @@ PARA = ['(', ')', '[', ']', '{', '}',]
     
 FUNCTION_DICT = {\
     'cos' : (math.cos, math.sin, 
-                      'sin(placeholder)'),
-    'sin' : (math.sin, lambda x:-math.cos(x), 
-                       '-1*cos(placeholder)',),
+                      '-1*sin(placeholder)'),
+    'sin' : (math.sin, lambda x:math.cos(x), 
+                       'cos(placeholder)',),
     'tan' : (math.tan, lambda x:1/(math.cos(x)**2), 
                        '1/cos(placeholder)^2'),
     'ln' : (math.log, lambda x:1/x, 
