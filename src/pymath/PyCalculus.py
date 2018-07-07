@@ -86,9 +86,9 @@ def differentiate(formula,
                 
             elif cur_tree.datum[1] == '^':
                 if len(cur_tree.children) != 2:
-                    f = cur_tree.children[0]
-                    g = Tree(('op', '^'), [cur_tree.children[1:]])
-                    return differentiate(Tree(('op', '^'), [f,g]), *args)
+                    f = cur_tree.children[-1]
+                    g = Tree(('op', '^'), [cur_tree.children[:-1]])
+                    return differentiate(Tree(('op', '^'), [g,f]), *args)
                 f = PyFormula(cur_tree.children[0])
                 g = PyFormula(cur_tree.children[1])
                 f_diff = differentiate(f, *args)

@@ -138,7 +138,7 @@ IMPORTANT : IF YOU CAN UNDERSTAND THE GRAMMAR, DO NOT READ THIS PART.
 Grammar is given as following; 
 
 1) expr -> part (binary part)* ; 
-2) part -> num | val | "(" expr ")" ; 
+2) part -> num | val | "(" expr ")" | func "(" (expr ,)* expr ")"; 
 3) binary -> "+" | "-" | "*" | "/" | "^" ; 
 4) num -> r"[1-9][0-9]*\.?[0-9]*|0" ; 
 5) val -> r"[a-zA-Z]+"
