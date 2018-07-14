@@ -649,7 +649,11 @@ P_k(j) = p P_{k-1}(j-1) + (1-p)P_{k-1}(j)
 P(D_i|F = F_t) = \frac{1}{\sqrt{2 \pi e_i^2}}e^{\frac{-(F_i - F_t)^2}{2e_i^2}}
 \end{equation}
 
-이다. 이 때, 관측된 $D_i$들에 대해서 다음과 같이 likelihood 함수를 생각할 수 있다. 
+이다. 
+
+\framebreak
+
+이 때, 관측된 $D_i$들에 대해서 다음과 같이 likelihood 함수를 생각할 수 있다. 
 
 \begin{equation} 
 L(D|F = F_t) = \Pi P(D_i|F = F_t)
@@ -657,18 +661,28 @@ L(D|F = F_t) = \Pi P(D_i|F = F_t)
 
 이를 최소한으로 만드는 $F_t$를 구하는 것을 \textbf{Maximum Likelihood Estimation}이라고 한다. 
 
+\framebreak
+
+즉, 
+
 \begin{equation} 
 \frac{dL}{dF_t} = 0
 \end{equation}
 
 의 근 $F_{estimate}$를 구하고, 이것을 $F_t$로 간주한다. 빈도주의자들에 따르자면 관측한 데이터가 충분히 많으면 이 진술은 참이 되며, 이를 대수의 법칙(Law of Large Numbers)라 한다. 
 
+
+\framebreak
+
 이것과 대조적으로, 베이지안은 $P(F=F_t|D)$가 최대가 되는 $F_t$를 찾고자 한다. 관측은 우리에게 $P(D|F=F_t)$를 알게 해주므로, 원하는 $F_t$를 구하기 위해서 베이즈의 법칙을 사용한다. 즉, 
 
 \begin{equation} 
 P(F = F_t | D) = \frac{P(D|F=F_t)P(F=F_t)}{P(D)}
 \end{equation}
-이다. 여기서 각 항들의 의미를 살펴보면 
+이다. 
+
+\framebreak
+ 각 항들의 의미를 살펴보면 
 
 \begin{itemize} 
 \item $P(F = F_t | D)$ : Posterior 확률
